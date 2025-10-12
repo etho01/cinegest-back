@@ -29,4 +29,14 @@ class LoginController extends Controller
             'email' => __('The provided credentials do not match our records.'),
         ]);
     }
+
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(['message' => __('Logged out successfully.')]);
+    }
 }
