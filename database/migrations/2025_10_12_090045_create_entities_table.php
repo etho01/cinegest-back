@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('name');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->enum('type', ['website', 'app']);
-            $table->string('phone')->nullable();
-            $table->integer('origin_id')->nullable()->default(null);
+        Schema::create('entities', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('entities');
     }
 };

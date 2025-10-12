@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Auth\Spa;
+namespace App\Http\Controllers\Api\App\Auth\Spa;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,15 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request)
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        $credentials['type'] = 'app';
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();

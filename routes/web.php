@@ -14,5 +14,6 @@ Route::get('test', function() {
     $user->firstname = "fer";
     $user->email = "barbeynicolas.basly@gmail.com";
     $user->password = Hash::make('password');
+    $user->type = "app";
     $user->save();
 });

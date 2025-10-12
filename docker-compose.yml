@@ -18,7 +18,7 @@ services:
     depends_on:
       - database
     ports:
-      - "8880:80"
+      - "8890:80"
     environment:
       PMA_HOST: database
       UPLOAD_LIMIT: 30M
@@ -29,8 +29,8 @@ services:
     build: ./
     container_name: cinegest-back
     ports:
-      - "8881:443"
-      - "8882:80"
+      - "8891:443"
+      - "8892:80"
     volumes:
       - ./:/app
     environment:
