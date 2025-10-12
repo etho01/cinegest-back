@@ -3,9 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Role\RoleUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -51,6 +54,19 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return true; // Implement your logic to determine if the user is a super admin
+        return RoleUser::where('user_id', $this->id)->where('role_id', 1)->exists();
+    }
+
+    public function hasRight(string $right): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return DB::table('role_rights')
+            ->join('role_users', 'role_rights.role_id', '=', 'role_users.role_id')
+            ->where('role_users.user_id', $this->id)
+            ->where('role_rights.right', $right)
+            ->exists();
     }
 }
