@@ -15,7 +15,7 @@ class HasRight
      */
     public function handle(Request $request, Closure $next, string $right): Response
     {
-        if (!$request->user() || !$request->user()->hasRight($right)) {
+        if (!$request->user() || !$request->user()->hasRight($right, $request->cinema)) {
             abort(403, 'Unauthorized action.');
         }
 

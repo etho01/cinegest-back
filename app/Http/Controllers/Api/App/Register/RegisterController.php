@@ -42,4 +42,37 @@ class RegisterController extends Controller
 
         return response()->json(['message' => 'Super admin registered successfully'], 201);
     }
+
+    public function registerUser(Request $request, $entity)
+    {
+        $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'roles' => 'required|array',
+        ]);
+
+        if (static::userExist($request->email, $entity)) {
+            return response()->json(['message' => 'User already exists'], 409);
+        }
+    
+        $user = User::create([
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'email' => $request->email,
+            'password' => '',
+            'type' => 'app',
+            'origin_id' => $entity,
+        ]);
+
+        foreach ($request->roles as $roleData) {
+            $userRole = new RoleUser();
+            $userRole->user_id = $user->id;
+            $userRole->role_id = $roleData['role_id'];
+            $userRole->cinema_id = $roleData['cinema_id'] ?? null;
+            $userRole->save();
+        }
+
+        return response()->json(['message' => 'User registered successfully'], 201);
+    }
 }

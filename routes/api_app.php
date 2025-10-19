@@ -2,16 +2,19 @@
 
 use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
+use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (){
-    Route::post('login', LoginController::class)->middleware('guest');
+    Route::post('login', LoginController::class);
 
-    Route::post('logout', [LoginController::class, 'logout'])->middleware('auth');
+    Route::post('logout', [LoginController::class, 'logout'])->middleware('auth:sanctum');
 });
 
-Route::prefix('superAdmin')->middleware(['auth:sanctum', IsSuperAdmin::class])->group(function () {
+Route::middleware('auth:sanctum')->get('/me', [LoginController::class, 'me']);
+
+Route::prefix('superAdmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->group(function () {
     Route::post('addSuperAdmin', [RegisterController::class, 'registerSuperAdmin']);
 
     Route::prefix('entity')->group(function () {
@@ -20,5 +23,11 @@ Route::prefix('superAdmin')->middleware(['auth:sanctum', IsSuperAdmin::class])->
         Route::get('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'show']);
         Route::put('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'update']);
         Route::delete('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'destroy']);
+    });
+});
+
+Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::post('register', [RegisterController::class, 'registerUser'])->middleware(HasRight::class . ':addUser');
     });
 });
