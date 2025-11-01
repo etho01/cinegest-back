@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Role\Role;
 use App\Models\Role\RoleUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -53,9 +54,16 @@ class User extends Authenticatable
         ];
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_users')
+            ->withPivot('cinema_id')
+            ->withTimestamps();
+    }
+
     public function isSuperAdmin(): bool
     {
-        return RoleUser::where('user_id', $this->id)->where('role_id', 1)->exists();
+        return $this->roles()->where('role_id', 1)->exists();
     }
 
     public function hasRight(string $right, ?int $cinemaId): bool
@@ -74,5 +82,14 @@ class User extends Authenticatable
                 $query->whereNull('role_users.cinema_id');
             })
             ->exists();
+    }
+
+    public function getEntityList()
+    {
+        if ($this->isSuperAdmin()) {
+            return Entity::all();
+        }
+
+        return Entity::where('id', $this->origin_id)->get();
     }
 }

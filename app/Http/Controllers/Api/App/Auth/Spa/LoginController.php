@@ -13,7 +13,11 @@ class LoginController extends Controller
 {
     public function me(Request $request)
     {
-        return Auth::user();
+        $user = Auth::user();
+        $user->isSuperAdmin = $user->isSuperAdmin();
+        $user->entityList = $user->getEntityList();
+        $user->load('roles');
+        return $user;
     }
 
     public function __invoke(Request $request)
