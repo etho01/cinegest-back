@@ -14,8 +14,10 @@ Route::prefix('auth')->group(function (){
 
 Route::middleware('auth:sanctum')->get('/me', [LoginController::class, 'me']);
 
-Route::prefix('superAdmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->group(function () {
-    Route::post('addSuperAdmin', [RegisterController::class, 'registerSuperAdmin']);
+Route::prefix('superadmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->group(function () {
+    Route::prefix('superadmin')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\App\SuperAdmin\SuperAdminController::class, 'index']);
+    });
 
     Route::prefix('entity')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'index']);

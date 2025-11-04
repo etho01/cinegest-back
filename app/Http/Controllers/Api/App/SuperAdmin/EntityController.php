@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 
 class EntityController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Entity::paginate(30);
+        $search = $request->input('search');
+        return Entity::where('name', 'like', "%{$search}%")->paginate(30);
     }
 
     public function store(Request $request)
@@ -22,12 +23,12 @@ class EntityController extends Controller
         $entity = Entity::create([
             'name' => $request->name,
         ]);
-        return response()->json($entity, 201);
+        return $entity;
     }
 
     public function show($id)
     {
-        return response()->json(Entity::findOrFail($id));
+        return Entity::findOrFail($id);
     }
 
     public function update(Request $request, $id)
@@ -42,13 +43,12 @@ class EntityController extends Controller
         }
         $entity->save();
 
-        return response()->json($entity);
+        return $entity;
     }
 
     public function destroy($id)
     {
         $entity = Entity::findOrFail($id);
         $entity->delete();
-        return response()->json(null, 204);
     }
 }
