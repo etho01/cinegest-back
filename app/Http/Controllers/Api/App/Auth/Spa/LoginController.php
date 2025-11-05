@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\App\Auth\Spa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Entity;
 use App\Models\UserToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +16,9 @@ class LoginController extends Controller
     {
         $user = Auth::user();
         $user->isSuperAdmin = $user->isSuperAdmin();
-        $user->entityList = $user->getEntityList();
+        $user->entities = $user->getEntityList();
         $user->load('roles');
+
         return $user;
     }
 
