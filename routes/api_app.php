@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
 use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
+use App\Models\Role\Role;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (){
@@ -29,8 +30,16 @@ Route::prefix('superadmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->
     });
 });
 
-Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () {
+Route::prefix('entity/{entityId}')->middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function () {
         Route::post('register', [RegisterController::class, 'registerUser'])->middleware(HasRight::class . ':addUser');
+    });
+
+    Route::prefix('cinemas')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'store']);
+        Route::get('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'show']);
+        Route::put('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'update']);
+        Route::delete('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'destroy']);
     });
 });
