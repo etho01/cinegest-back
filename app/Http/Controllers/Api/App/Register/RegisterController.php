@@ -49,7 +49,8 @@ class RegisterController extends Controller
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
-            'roles' => 'required|array',
+         //   'roles' => 'required|array',
+            'phone' => 'sometimes|nullable|string|max:20',
         ]);
 
         if (static::userExist($request->email, $entity)) {
@@ -63,6 +64,7 @@ class RegisterController extends Controller
             'password' => '',
             'type' => 'app',
             'origin_id' => $entity,
+            'phone' => $request->phone ?? null,
         ]);
 
         foreach ($request->roles as $roleData) {

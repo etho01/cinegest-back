@@ -15,8 +15,24 @@ class HasRight
      */
     public function handle(Request $request, Closure $next, string $right): Response
     {
-        if (!$request->user() || !$request->user()->hasRight($right, $request->cinema)) {
-            abort(403, 'Unauthorized action.');
+        $user = $request->user();
+
+        if (!$user) 
+        {
+            abort(401, 'Unauthorized action.');
+        }
+
+        $cinema = $request->cinema;
+        $cinemaId = $cinema ? $cinema->id : null;
+
+        if (!$user->hasRight($right, $cinemaId)) 
+        {
+            if ($user->isSuperAdmin()) 
+            {
+                return $next($request);
+            }
+            
+            abort(403, 'Forbidden action.');
         }
 
         return $next($request);

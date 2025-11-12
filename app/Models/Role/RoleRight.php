@@ -9,18 +9,23 @@ class RoleRight extends Model
     public static $RIGHTS = [
         'global' => [
             // user management
-            'view_users',
-            'edit_users',
-            'create_users',
-            'delete_users',
+            'viewUsers',
+            'editUser',
+            'addUser',
+            'deleteUser',
 
             // manage cinema
-            'add_cinema',
-            'remove_cinema',
-            'edit_cinema',
+            'viewCinemas',
+            'addCinema',
+            'editCinema',
+            'deleteCinema',
         ],
         'cinema' => [
-            
+            // manage movies
+            'viewMovies',
+            'addMovie',
+            'editMovie',
+            'deleteMovie',
         ],
     ];
 }

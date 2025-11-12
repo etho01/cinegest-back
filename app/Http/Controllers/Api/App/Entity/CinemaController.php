@@ -23,6 +23,11 @@ class CinemaController extends Controller
         })->where('entity_id', $entityId)->paginate(30);
     }
 
+    public function all(Int $entityId)
+    {
+        return Cinema::where('entity_id', $entityId)->get();
+    }
+
     public function store(Request $request, Int $entityId)
     {
         $validated = $request->validate([
