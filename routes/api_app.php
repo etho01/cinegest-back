@@ -6,6 +6,7 @@ use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
 use App\Models\Role\Role;
 use Illuminate\Support\Facades\Route;
+use Termwind\Components\Raw;
 
 Route::prefix('auth')->group(function (){
     Route::post('login', LoginController::class);
@@ -42,10 +43,14 @@ Route::prefix('entity/{entityId}')->middleware('auth:sanctum')->group(function (
 
     Route::prefix('users')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'index'])->middleware(HasRight::class . ':viewUsers');
-        Route::get('/{user}', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'show'])->middleware(HasRight::class . ':viewUsers');
         Route::post('/', [RegisterController::class, 'registerUser'])->middleware(HasRight::class . ':addUser');
-        Route::put('/{user}', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'update'])->middleware(HasRight::class . ':editUser');
-        Route::delete('/{user}', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'destroy'])->middleware(HasRight::class . ':deleteUser');
+        Route::prefix('{user}')->group(function() {
+            Route::post('roles', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'setRoles'])->middleware(HasRight::class . ':editUserRoles');
+            Route::post('rights', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'setRights'])->middleware(HasRight::class . ':editUserRights');
+            Route::get('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'show'])->middleware(HasRight::class . ':viewUsers');
+            Route::put('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'update'])->middleware(HasRight::class . ':editUser');
+            Route::delete('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'destroy'])->middleware(HasRight::class . ':deleteUser');
+        });
     });
 
     Route::prefix('roles')->group(function () {

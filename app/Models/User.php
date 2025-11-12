@@ -62,6 +62,28 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function getRoles() : array
+    {
+        $roles = $this->roles()->get();
+        foreach ($roles as $i => $role) {
+            $role->cinemaId = $role->pivot->cinema_id;
+            $role->entityId = $role->entityId;
+            $role->rights = $role->getRights();
+            $roles[$i] = $role;
+        }
+        return $roles->toArray();
+    }
+
+    public function right()
+    {
+        return $this->hasMany(UserRight::class);
+    }
+
+    public function getRights(): array
+    {
+        return $this->right()->pluck('right')->toArray();
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->roles()->where('role_id', 1)->exists();

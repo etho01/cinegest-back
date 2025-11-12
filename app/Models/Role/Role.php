@@ -16,4 +16,9 @@ class Role extends Model
             $roleRight->save();
         }
     }
+
+    public function getRights()
+    {
+        return RoleRight::where('role_id', $this->id)->pluck('right')->toArray();
+    }
 }
