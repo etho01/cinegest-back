@@ -110,9 +110,9 @@ class User extends Authenticatable
     public function getEntityList()
     {
         if ($this->isSuperAdmin()) {
-            return Entity::all();
+            return Entity::with('cinemas')->get();
         }
 
-        return Entity::where('id', $this->origin_id)->get();
+        return Entity::with('cinemas')->where('id', $this->origin_id)->get();
     }
 }

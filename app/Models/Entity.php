@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Entity\Cinema;
 use Illuminate\Database\Eloquent\Model;
 
 class Entity extends Model
@@ -14,4 +15,9 @@ class Entity extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function cinemas()
+    {
+        return $this->hasMany(Cinema::class, 'entity_id');
+    }
 }
