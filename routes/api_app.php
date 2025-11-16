@@ -4,6 +4,13 @@ use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
 use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
+use App\Http\Controllers\Api\App\Entity\UserController;
+use App\Http\Controllers\Api\App\Entity\RoleController;
+use App\Http\Controllers\Api\App\SuperAdmin\SuperAdminController;
+use App\Http\Controllers\Api\App\SuperAdmin\EntityController;
+use App\Http\Controllers\Api\App\Entity\CinemaController;
+use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsTypeController;
+use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsController;
 use App\Models\Role\Role;
 use Illuminate\Support\Facades\Route;
 use Termwind\Components\Raw;
@@ -18,47 +25,65 @@ Route::middleware('auth:sanctum')->get('/me', [LoginController::class, 'me']);
 
 Route::prefix('superadmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->group(function () {
     Route::prefix('superadmin')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\App\SuperAdmin\SuperAdminController::class, 'index']);
+        Route::get('/', [SuperAdminController::class, 'index']);
         Route::post('/', [RegisterController::class, 'registerSuperAdmin']);
     });
 
     Route::prefix('entity')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'store']);
-        Route::get('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'show']);
-        Route::put('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'update']);
-        Route::delete('/{entity}', [\App\Http\Controllers\Api\App\SuperAdmin\EntityController::class, 'destroy']);
+        Route::get('/', [EntityController::class, 'index']);
+        Route::post('/', [EntityController::class, 'store']);
+        Route::get('/{entity}', [EntityController::class, 'show']);
+        Route::put('/{entity}', [EntityController::class, 'update']);
+        Route::delete('/{entity}', [EntityController::class, 'destroy']);
     });
 });
 
-Route::prefix('entity/{entityId}')->middleware('auth:sanctum')->group(function () {
+Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () {
     Route::prefix('cinemas')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'index'])->middleware(HasRight::class . ':viewCinemas');
-        Route::post('/', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'store'])->middleware(HasRight::class . ':addCinema');
-        Route::get('/all', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'all'])->middleware(HasRight::class . ':viewCinemas');
-        Route::get('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'show'])->middleware(HasRight::class . ':viewCinemas');
-        Route::put('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'update'])->middleware(HasRight::class . ':editCinema');
-        Route::delete('/{cinema}', [\App\Http\Controllers\Api\App\Entity\CinemaController::class, 'destroy'])->middleware(HasRight::class . ':deleteCinema');
+        Route::get('/', [CinemaController::class, 'index'])->middleware(HasRight::class . ':viewCinemas');
+        Route::post('/', [CinemaController::class, 'store'])->middleware(HasRight::class . ':addCinema');
+        Route::get('/all', [CinemaController::class, 'all'])->middleware(HasRight::class . ':viewCinemas');
+        Route::get('/{cinema}', [CinemaController::class, 'show'])->middleware(HasRight::class . ':viewCinemas');
+        Route::put('/{cinema}', [CinemaController::class, 'update'])->middleware(HasRight::class . ':editCinema');
+        Route::delete('/{cinema}', [CinemaController::class, 'destroy'])->middleware(HasRight::class . ':deleteCinema');
+        Route::prefix('{cinema}')->group(function() {
+            Route::prefix('settings')->group(function() {
+                Route::prefix('option-types')->group(function() {
+                    Route::get('/', [OptionsTypeController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::get('all', [OptionsTypeController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::post('/', [OptionsTypeController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::put('/{optionsType}', [OptionsTypeController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::delete('/{optionsType}', [OptionsTypeController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                });
+                Route::prefix('options')->group(function() {
+                    Route::get('/', [OptionsController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::get('all', [OptionsController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::post('/', [OptionsController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::put('/{option}', [OptionsController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::delete('/{option}', [OptionsController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                });
+            });
+        });
     });
 
     Route::prefix('users')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'index'])->middleware(HasRight::class . ':viewUsers');
+        Route::get('/', [UserController::class, 'index'])->middleware(HasRight::class . ':viewUsers');
         Route::post('/', [RegisterController::class, 'registerUser'])->middleware(HasRight::class . ':addUser');
         Route::prefix('{user}')->group(function() {
-            Route::post('roles', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'setRoles'])->middleware(HasRight::class . ':editUserRoles');
-            Route::post('rights', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'setRights'])->middleware(HasRight::class . ':editUserRights');
-            Route::get('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'show'])->middleware(HasRight::class . ':viewUsers');
-            Route::put('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'update'])->middleware(HasRight::class . ':editUser');
-            Route::delete('/', [\App\Http\Controllers\Api\App\Entity\UserController::class, 'destroy'])->middleware(HasRight::class . ':deleteUser');
+            Route::post('roles', [UserController::class, 'setRoles'])->middleware(HasRight::class . ':editUserRoles');
+            Route::post('rights', [UserController::class, 'setRights'])->middleware(HasRight::class . ':editUserRights');
+            Route::get('/', [UserController::class, 'show'])->middleware(HasRight::class . ':viewUsers');
+            Route::put('/', [UserController::class, 'update'])->middleware(HasRight::class . ':editUser');
+            Route::delete('/', [UserController::class, 'destroy'])->middleware(HasRight::class . ':deleteUser');
         });
     });
 
     Route::prefix('roles')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'index'])->middleware(HasRight::class . ':viewRoles');
-        Route::get('/all', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'all'])->middleware(HasRight::class . ':viewRoles');
-        Route::get('/{role}', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'show'])->middleware(HasRight::class . ':viewRoles');
-        Route::post('/', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'store'])->middleware(HasRight::class . ':addRole');
-        Route::put('/{role}', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'update'])->middleware(HasRight::class . ':editRole');
-        Route::delete('/{role}', [\App\Http\Controllers\Api\App\Entity\RoleController::class, 'destroy'])->middleware(HasRight::class . ':deleteRole');
+        Route::get('/', [RoleController::class, 'index'])->middleware(HasRight::class . ':viewRoles');
+        Route::get('/all', [RoleController::class, 'all'])->middleware(HasRight::class . ':viewRoles');
+        Route::get('/{role}', [RoleController::class, 'show'])->middleware(HasRight::class . ':viewRoles');
+        Route::post('/', [RoleController::class, 'store'])->middleware(HasRight::class . ':addRole');
+        Route::put('/{role}', [RoleController::class, 'update'])->middleware(HasRight::class . ':editRole');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware(HasRight::class . ':deleteRole');
     });
 });

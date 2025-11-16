@@ -23,7 +23,11 @@ class HasRight
         }
 
         $cinema = $request->cinema;
-        $cinemaId = $cinema ? $cinema->id : null;
+        $cinemaId = null;
+        if ($cinema) 
+        {
+            $cinemaId = is_object($cinema) ? $cinema->id : $cinema;
+        }
 
         if (!$user->hasRight($right, $cinemaId)) 
         {
