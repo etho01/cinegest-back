@@ -8,13 +8,20 @@ use Illuminate\Http\Request;
 
 class OptionsController extends Controller
 {
-    public function index(Int $entityId, Int $cinemaId)
+    public function index(Request $request, Int $entityId, Int $cinemaId)
     {
-        return Option::
+        $search = $request->input('search', '');
+        $query = Option::
             with('type')
             ->where('cinema_id', $cinemaId)
-            ->where('name', 'like', '%' . request()->query('search', '') . '%')
-            ->paginate(30);
+            ->where('name', 'like', '%' . $search . '%');
+
+        if (count($request->input('optionTypes', [])) != 0)
+        {
+            $query->whereIn('options_type_id', $request->input('optionTypes', []));
+        }
+
+        return $query->paginate(30);
     }
 
     public function all(Int $entityId, Int $cinemaId)

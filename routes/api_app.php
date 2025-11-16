@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\App\SuperAdmin\EntityController;
 use App\Http\Controllers\Api\App\Entity\CinemaController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsTypeController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsController;
+use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageTypeController;
+use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageController;
 use App\Models\Role\Role;
 use Illuminate\Support\Facades\Route;
 use Termwind\Components\Raw;
@@ -61,6 +63,20 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                     Route::post('/', [OptionsController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
                     Route::put('/{option}', [OptionsController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
                     Route::delete('/{option}', [OptionsController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                });
+                Route::prefix('storage-type')->group(function() {
+                    Route::get('/', [StorageTypeController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::get('all', [StorageTypeController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::post('/', [StorageTypeController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::put('/{storageType}', [StorageTypeController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::delete('/{storageType}', [StorageTypeController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                });
+                Route::prefix('storage')->group(function() {
+                    Route::get('/', [StorageController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::get('all', [StorageController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::post('/', [StorageController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::put('/{storageType}', [StorageController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::delete('/{storageType}', [StorageController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
                 });
             });
         });
