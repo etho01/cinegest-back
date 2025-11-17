@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\App\SuperAdmin\EntityController;
 use App\Http\Controllers\Api\App\Entity\CinemaController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsTypeController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\OptionsController;
+use App\Http\Controllers\Api\App\Entity\Cinema\Settings\RoomController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageTypeController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageController;
 use App\Models\Role\Role;
@@ -77,6 +78,13 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                     Route::post('/', [StorageController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
                     Route::put('/{storageType}', [StorageController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
                     Route::delete('/{storageType}', [StorageController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                });
+                Route::prefix('room')->group(function() {
+                    Route::get('/', [RoomController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::get('all', [RoomController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
+                    Route::post('/', [RoomController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::put('/{room}', [RoomController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::delete('/{room}', [RoomController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
                 });
             });
         });
