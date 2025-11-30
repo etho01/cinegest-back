@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\App\Entity\Cinema\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Cinema\Settings\Option;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OptionsController extends Controller
 {
@@ -27,7 +28,8 @@ class OptionsController extends Controller
     public function all(Int $entityId, Int $cinemaId)
     {
         return Option::
-            where('cinema_id', $cinemaId)
+            select('id', 'name', 'options_type_id', DB::raw('options_type_id as option_type_id'))
+            ->where('cinema_id', $cinemaId)
             ->get();
     }
 
