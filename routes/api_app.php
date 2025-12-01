@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
 use App\Http\Controllers\Api\App\Entity\Cinema\MovieController;
+use App\Http\Controllers\Api\App\Entity\Cinema\MovieVersionController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
 use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
@@ -56,9 +57,16 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                 Route::get('/', [MovieController::class, 'index'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::get('all', [MovieController::class, 'all'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::post('/', [MovieController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
-                Route::get('/{movie}', [MovieController::class, 'show'])->middleware(HasRight::class . ':viewCinemaMovies');
-                Route::put('/{movie}', [MovieController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
-                Route::delete('/{movie}', [MovieController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
+                Route::prefix('{movie}')->group(function() {
+                    Route::get('/', [MovieController::class, 'show'])->middleware(HasRight::class . ':viewCinemaMovies');
+                    Route::put('/', [MovieController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
+                    Route::delete('/', [MovieController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
+                    Route::prefix('version')->group(function() {
+                        Route::post('/', [MovieVersionController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
+                        Route::put('/{version}', [MovieVersionController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
+                        Route::delete('/{version}', [MovieVersionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
+                    });
+                });
             });
 
             Route::prefix('settings')->group(function() {

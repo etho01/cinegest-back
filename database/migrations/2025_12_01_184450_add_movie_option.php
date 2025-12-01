@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('movie_versions', function (Blueprint $table) {
+        Schema::create('movie_version_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('movieId')->constrained('movies')->onDelete('cascade');
-            $table->string('versionName');
-            $table->double('size')->nullable();
+            $table->foreignId('movieVersionId')->constrained('movie_versions')->onDelete('cascade');
+            $table->foreignId('movieOptionId')->constrained('options')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('movie_versions');
+        Schema::dropIfExists('movie_version_options');
     }
 };

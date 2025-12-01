@@ -18,7 +18,9 @@ class MovieController extends Controller
 
     public function show(Int $entityId, Int $cinemaId, Int $movieId)
     {
-        $movie = Movie::with('versions')->findOrFail($movieId);
+        $movie = Movie::with([
+            'versions.options'
+        ])->findOrFail($movieId);
         return $movie;
     }
 

@@ -16,6 +16,6 @@ class Movie extends Model
 
     public function versions()
     {
-        return $this->hasMany(\App\Models\Movie\MovieVersion::class);
+        return $this->hasMany(\App\Models\Movie\MovieVersion::class, 'movieId');
     }
 }
