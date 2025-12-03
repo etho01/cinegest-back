@@ -16,6 +16,12 @@ class MovieController extends Controller
         return $movies;
     }
 
+    public function allActive(Int $entityId, Int $cinemaId)
+    {
+        $movies = Movie::where('cinema_id', $cinemaId)->where('status', 1)->get();
+        return $movies;
+    }
+
     public function show(Int $entityId, Int $cinemaId, Int $movieId)
     {
         $movie = Movie::with([

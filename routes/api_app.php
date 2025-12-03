@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
+use App\Http\Controllers\Api\App\Entity\Cinema\KeyController;
 use App\Http\Controllers\Api\App\Entity\Cinema\MovieController;
 use App\Http\Controllers\Api\App\Entity\Cinema\MovieVersionController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
@@ -57,6 +58,7 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                 Route::get('/', [MovieController::class, 'index'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::get('all', [MovieController::class, 'all'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::post('/', [MovieController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
+                Route::get('active/all', [MovieController::class, 'allActive'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::prefix('{movie}')->group(function() {
                     Route::get('/', [MovieController::class, 'show'])->middleware(HasRight::class . ':viewCinemaMovies');
                     Route::put('/', [MovieController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
@@ -67,6 +69,9 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                         Route::delete('/{version}', [MovieVersionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
                     });
                 });
+            });
+            Route::prefix('key')->group(function() {
+                Route::get('/', [KeyController::class, 'index'])->middleware(HasRight::class . ':viewCinemaKey');
             });
 
             Route::prefix('settings')->group(function() {
