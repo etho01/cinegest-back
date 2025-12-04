@@ -59,6 +59,9 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                 Route::get('/', [MovieController::class, 'index'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::get('all', [MovieController::class, 'all'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::post('/', [MovieController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
+                Route::prefix('version')->group(function() {
+                    Route::get('search', [MovieVersionController::class, 'search'])->middleware(HasRight::class . ':viewCinemaMovies');
+                });
                 Route::get('active/all', [MovieController::class, 'allActive'])->middleware(HasRight::class . ':viewCinemaMovies');
                 Route::prefix('{movie}')->group(function() {
                     Route::get('/', [MovieController::class, 'show'])->middleware(HasRight::class . ':viewCinemaMovies');
@@ -67,6 +70,7 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                     Route::put('size', [MovieController::class, 'updateSize'])->middleware(HasRight::class . ':viewCinemaMovies');
                     Route::prefix('version')->group(function() {
                         Route::post('/', [MovieVersionController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
+                        
                         Route::put('/{version}', [MovieVersionController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
                         Route::delete('/{version}', [MovieVersionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
                     });
@@ -74,6 +78,8 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
             });
             Route::prefix('key')->group(function() {
                 Route::get('/', [KeyController::class, 'index'])->middleware(HasRight::class . ':viewCinemaKey');
+                Route::post('/addKeys', [KeyController::class, 'addKeys'])->middleware(HasRight::class . ':editCinemaKey');
+                Route::delete('/{key}', [KeyController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaKey');
             });
 
             Route::prefix('storage-item')->group(function() {
