@@ -11,7 +11,7 @@ class Movie extends Model
         'description',
         'releaseDate',
         'externalId',
-        'sizeGB',
+        'size',
     ];
 
     public function versions()

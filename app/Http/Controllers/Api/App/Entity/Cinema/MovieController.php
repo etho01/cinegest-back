@@ -16,6 +16,19 @@ class MovieController extends Controller
         return $movies;
     }
 
+    public function updateSize(Request $request, Int $entityId, Int $cinemaId, Int $movieId)
+    {
+        $validated = $request->validate([
+            'size' => 'required|numeric|min:0',
+        ]);
+
+        $movie = Movie::where('cinema_id', $cinemaId)->findOrFail($movieId);
+        $movie->size = $validated['size'];
+        $movie->save();
+
+        return $movie;
+    }
+
     public function allActive(Int $entityId, Int $cinemaId)
     {
         $movies = Movie::where('cinema_id', $cinemaId)->where('status', 1)->get();
@@ -49,7 +62,7 @@ class MovieController extends Controller
             'description' => 'required|string',
             'releaseDate' => 'required|date',
             'externalId' => 'required',
-            'sizeGB' => 'nullable|numeric',
+            'size' => 'nullable|numeric',
         ]);
 
         $durationMinutes = MovieApi::getDetails($validated['externalId'])['runtime'] ?? 0;
@@ -58,7 +71,7 @@ class MovieController extends Controller
         $movie = new Movie($validated);
         $movie->cinema_id = $cinemaId;
         $movie->durationMinutes = $durationMinutes;
-        $movie->sizeGB = $request->input('sizeGB', 0);
+        $movie->size = $request->input('size', 0);
         $movie->save();
 
         return response()->json(['message' => 'Movie created successfully'], 201);
