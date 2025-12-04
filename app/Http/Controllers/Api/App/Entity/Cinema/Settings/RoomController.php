@@ -44,6 +44,7 @@ class RoomController extends Controller
             'optionsIds.*' => 'integer|exists:options,id',
             'storagesIds' => 'array',
             'storagesIds.*' => 'integer|exists:storages,id',
+            'serveurSize' => 'required|integer|min:0',
         ]);
 
         $room = new Room($validated);
@@ -70,6 +71,7 @@ class RoomController extends Controller
             'optionsIds.*' => 'integer|exists:options,id',
             'storagesIds' => 'array',
             'storagesIds.*' => 'integer|exists:storages,id',
+            'serveurSize' => 'required|integer|min:0',
         ]);
 
         $room = Room::where('cinema_id', $cinemaId)->findOrFail($roomId);
