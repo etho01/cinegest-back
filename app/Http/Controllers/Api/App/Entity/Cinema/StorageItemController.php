@@ -26,4 +26,15 @@ class StorageItemController extends Controller
         }
         return $query->paginate(30);
     }
+
+    public function stores(Request $request)
+    {
+        $request->validate([
+            'roomId' => 'nullable|integer|exists:rooms,id',
+            'storageId' => 'nullable|integer|exists:storages,id',
+            'originId' => 'nullable|integer|exists:storages,id',
+            'versions' => 'required|array',
+            'versions.*.id' => 'required|integer|exists:movie_versions,id',
+        ]);
+    }
 }

@@ -78,7 +78,7 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
 
             Route::prefix('storage-item')->group(function() {
                 Route::get('/', [StorageItemController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                Route::post('/', [StorageItemController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
+                Route::post('/stores', [StorageItemController::class, 'stores'])->middleware(HasRight::class . ':editCinemaSettings');
                 Route::put('/{storageItem}', [StorageItemController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
                 Route::delete('/{storageItem}', [StorageItemController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
             });
