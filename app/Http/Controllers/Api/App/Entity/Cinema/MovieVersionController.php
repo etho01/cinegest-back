@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\App\Entity\Cinema;
 use App\Http\Controllers\Controller;
 use App\Models\Movie\MovieVersion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MovieVersionController extends Controller
 {
@@ -24,6 +25,18 @@ class MovieVersionController extends Controller
         }
 
         return response()->json($movieVersion, 201);
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->input('search', '');
+        $movieVersions = MovieVersion::
+        with('movie')
+        ->select('movie_versions.*')
+        ->where('movies.status', 1)
+        ->join('movies', 'movies.id', '=', 'movie_versions.movieId')
+        ->where(DB::raw('CONCAT(movies.title, " ", movie_versions.versionName)'), 'like', '%' . $search . '%')->get();
+        return $movieVersions;
     }
 
     public function update(Request $request, Int $entityId, Int $cinemaId, Int $movieId, Int $versionId)
