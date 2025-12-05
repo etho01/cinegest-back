@@ -9,9 +9,9 @@ use NoneStorageSelectedException;
 class AddStorageItem
 {
     public function __construct(
-        private int $roomId,
-        private int $storageId,
-        private int $originId,
+        private ?int $roomId,
+        private ?int $storageId,
+        private ?int $originId,
         private array $movieVersions
     )
     {
@@ -19,12 +19,12 @@ class AddStorageItem
 
     public function execute()
     {
-        if ($this->roomId == 0 && $this->storageId == 0) 
+        if ($this->roomId == null && $this->storageId == null) 
         {
             throw new NoneStorageSelectedException();
         }
 
-        if ($this->roomId == 0 && $this->originId == 0) 
+        if ($this->roomId != null && $this->originId == null) 
         {
             throw new NeedOriginException();
         }
@@ -47,9 +47,9 @@ class AddStorageItem
     }
 
     public static function handle(
-        int $roomId,
-        int $storageId,
-        int $originId,
+        ?int $roomId,
+        ?int $storageId,
+        ?int $originId,
         array $movieVersions
     )
     {

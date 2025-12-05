@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('storage_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('storageId')->constrained('storages')->onDelete('cascade');
-            $table->foreignId('roomId')->constrained('rooms')->onDelete('cascade');
+            $table->foreignId('storageId')->nullable()->constrained('storages')->onDelete('cascade');
+            $table->foreignId('roomId')->nullable()->constrained('rooms')->onDelete('cascade');
             $table->foreignId('movieVersionId')->constrained('movie_versions')->onDelete('cascade');
             $table->foreignId('movieId')->constrained('movies')->onDelete('cascade');
-            $table->foreignId('originId')->constrained('storages')->nullable()->onDelete('cascade');
+            $table->foreignId('originId')->nullable()->constrained('storages')->onDelete('cascade');
             $table->string('status')->default('pending');
             $table->timestamps();
         });

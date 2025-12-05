@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        /*
+        
         $exceptions->render(function (\Illuminate\Validation\ValidationException $exception) {
             return response()->json([
                 'errors' => $exception->errors(),
@@ -35,5 +35,5 @@ return Application::configure(basePath: dirname(__DIR__))
                 'type' => $exception->type(),
             ], $exception->getCode());
         });
-        */
+        
     })->create();

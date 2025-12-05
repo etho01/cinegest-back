@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\App\Entity\Cinema;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\App\Entity\Cinema\StorageItemResource;
 use App\Models\Cinema\Settings\Storage;
 use App\Models\Cinema\StorageItem;
 use App\UseCase\Cinema\Storage\AddStorageItem;
@@ -15,7 +16,7 @@ class StorageItemController extends Controller
         $rooms = $request->input('rooms', []);
         $storage = $request->input('storage', []);
         $movie = $request->input('movie', []);
-        $query = StorageItem::query();
+        $query = StorageItem::with(['storage', 'room', 'movieVersion', 'movie', 'origin']);
         if (!empty($rooms)) {
             $query->whereIn('roomId', $rooms);
         }
@@ -25,7 +26,7 @@ class StorageItemController extends Controller
         if (!empty($movie)) {
             $query->whereIn('movieId', $movie);
         }
-        return $query->paginate(30);
+        return  StorageItemResource::collection($query->paginate(30));
     }
 
     public function stores(Request $request)
@@ -39,9 +40,9 @@ class StorageItemController extends Controller
         ]);
 
        AddStorageItem::handle(
-            roomId: $request->input('roomId', 0),
-            storageId: $request->input('storageId', 0),
-            originId: $request->input('originId', 0),
+            roomId: $request->input('roomId'),
+            storageId: $request->input('storageId'),
+            originId: $request->input('originId'),
             movieVersions: $request->input('movieVersions', []),
         );
 
