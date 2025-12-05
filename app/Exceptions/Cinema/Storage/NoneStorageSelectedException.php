@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Exceptions\Cinema\Storage;
 use App\Exceptions\CustomException;
 
 class NoneStorageSelectedException extends CustomException
