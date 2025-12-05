@@ -48,4 +48,11 @@ class StorageItemController extends Controller
 
         return response()->json(['message' => 'Storage items added successfully.'], 201);
     }
+
+    public function destroy(Int $entityId, Int $cinemaId, Int $storageItemId)
+    {
+        $storageItem = StorageItem::findOrFail($storageItemId);
+        $storageItem->delete();
+        return response()->json(['message' => 'Storage item deleted successfully.'], 200);
+    }
 }
