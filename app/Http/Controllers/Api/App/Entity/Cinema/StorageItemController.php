@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\App\Entity\Cinema;
 use App\Http\Controllers\Controller;
 use App\Models\Cinema\Settings\Storage;
 use App\Models\Cinema\StorageItem;
+use App\UseCase\Cinema\Storage\AddStorageItem;
 use Illuminate\Http\Request;
 
 class StorageItemController extends Controller
@@ -33,10 +34,17 @@ class StorageItemController extends Controller
             'roomId' => 'nullable|integer|exists:rooms,id',
             'storageId' => 'nullable|integer|exists:storages,id',
             'originId' => 'nullable|integer|exists:storages,id',
-            'versions' => 'required|array',
-            'versions.*.id' => 'required|integer|exists:movie_versions,id',
+            'movieVersions' => 'array',
+            'movieVersions.*' => 'required|integer|exists:movie_versions,id',
         ]);
 
-       
+       AddStorageItem::handle(
+            roomId: $request->input('roomId', 0),
+            storageId: $request->input('storageId', 0),
+            originId: $request->input('originId', 0),
+            movieVersions: $request->input('movieVersions', []),
+        );
+
+        return response()->json(['message' => 'Storage items added successfully.'], 201);
     }
 }
