@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\CustomException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,5 +19,19 @@ return Application::configure(basePath: dirname(__DIR__))
        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $exception) {
+            return response()->json([
+                'errors' => $exception->errors(),
+                'message' => $exception->getMessage(),
+                'type' => 'validation',
+            ], 422);
+        });
+
+        $exceptions->render(function (CustomException $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => $exception->errors(),
+                'type' => $exception->type(),
+            ], $exception->getCode());
+        });
     })->create();
