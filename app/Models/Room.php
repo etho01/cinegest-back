@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Cinema\Settings\Option;
 use App\Models\Cinema\Settings\Storage;
 use App\Models\Entity\Cinema;
+use App\Models\Movie\MovieVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
@@ -29,5 +30,19 @@ class Room extends Model
     public function Storages()
     {
         return $this->belongsToMany(Storage::class, 'room_storages');
+    }
+
+    public function canDifuseMovieVersion(MovieVersion $movieVersion): bool
+    {
+        $requiredOptions = $movieVersion->Options->pluck('id')->toArray();
+        $roomOptions = $this->Options->pluck('id')->toArray();
+
+        foreach ($requiredOptions as $optionId) {
+            if (!in_array($optionId, $roomOptions)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

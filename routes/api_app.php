@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\App\Auth\Spa\LoginController;
 use App\Http\Controllers\Api\App\Entity\Cinema\KeyController;
 use App\Http\Controllers\Api\App\Entity\Cinema\MovieController;
 use App\Http\Controllers\Api\App\Entity\Cinema\MovieVersionController;
+use App\Http\Controllers\Api\App\Entity\Cinema\SessionController;
 use App\Http\Controllers\Api\App\Register\RegisterController;
 use App\Http\Middleware\HasRight;
 use App\Http\Middleware\IsSuperAdmin;
@@ -54,6 +55,12 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
         Route::put('/{cinema}', [CinemaController::class, 'update'])->middleware(HasRight::class . ':editCinema');
         Route::delete('/{cinema}', [CinemaController::class, 'destroy'])->middleware(HasRight::class . ':deleteCinema');
         Route::prefix('{cinema}')->group(function() {
+            Route::prefix('session')->group(function() {
+                Route::get('/', [SessionController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSessions');
+                Route::post('/addSessions', [SessionController::class, 'addSessions'])->middleware(HasRight::class . ':editCinemaSessions');
+                Route::delete('/{session}', [SessionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSessions');
+            });
+
             Route::prefix('movie')->group(function() {
                 Route::get('search', [MovieController::class, 'search']);
                 Route::get('/', [MovieController::class, 'index'])->middleware(HasRight::class . ':viewCinemaMovies');
@@ -76,6 +83,7 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                     });
                 });
             });
+
             Route::prefix('key')->group(function() {
                 Route::get('/', [KeyController::class, 'index'])->middleware(HasRight::class . ':viewCinemaKey');
                 Route::post('/addKeys', [KeyController::class, 'addKeys'])->middleware(HasRight::class . ':editCinemaKey');
