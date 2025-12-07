@@ -97,6 +97,16 @@ return [
             'retry_after' => 60,
         ],
 
+        'mailjet' => [
+            'transport' => 'mailjet',
+            'host' => env('MAIL_HOST', 'in-v3.mailjet.com'),
+            'port' => env('MAIL_PORT', 587),
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'timeout' => null,
+        ],
+
     ],
 
     /*

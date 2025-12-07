@@ -27,9 +27,16 @@ Route::prefix('auth')->group(function (){
     Route::post('login', LoginController::class);
 
     Route::post('logout', [LoginController::class, 'logout'])->middleware('auth:sanctum');
+    
+    // Password Reset Routes
+    Route::post('forgot-password', [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'sendResetLinkEmail']);
+    Route::post('reset-password', [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'reset']);
+    Route::post('verify-reset-token', [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'verifyToken']);
 });
 
 Route::middleware('auth:sanctum')->get('/me', [LoginController::class, 'me']);
+Route::middleware('auth:sanctum')->put('/me', [LoginController::class, 'updateMe']);
+Route::middleware('auth:sanctum')->post('/me/password', [LoginController::class, 'updateMyPassword']);
 
 Route::prefix('superadmin')->middleware([IsSuperAdmin::class, 'auth:sanctum'])->group(function () {
     Route::prefix('superadmin')->group(function () {
