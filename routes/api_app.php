@@ -76,10 +76,10 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
                     Route::delete('/', [MovieController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
                     Route::put('size', [MovieController::class, 'updateSize'])->middleware(HasRight::class . ':viewCinemaMovies');
                     Route::prefix('version')->group(function() {
-                        Route::post('/', [MovieVersionController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovies');
+                        Route::post('/', [MovieVersionController::class, 'store'])->middleware(HasRight::class . ':editCinemaMovieVersions');
                         
-                        Route::put('/{version}', [MovieVersionController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovies');
-                        Route::delete('/{version}', [MovieVersionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovies');
+                        Route::put('/{version}', [MovieVersionController::class, 'update'])->middleware(HasRight::class . ':editCinemaMovieVersions');
+                        Route::delete('/{version}', [MovieVersionController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaMovieVersions');
                     });
                 });
             });
@@ -91,47 +91,47 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
             });
 
             Route::prefix('storage-item')->group(function() {
-                Route::get('/', [StorageItemController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                Route::post('/stores', [StorageItemController::class, 'stores'])->middleware(HasRight::class . ':editCinemaSettings');
-                Route::put('/{storageItem}', [StorageItemController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                Route::delete('/{storageItem}', [StorageItemController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                Route::get('/', [StorageItemController::class, 'index'])->middleware(HasRight::class . ':viewStrorageItems');
+                Route::post('/stores', [StorageItemController::class, 'stores'])->middleware(HasRight::class . ':editStorageItems');
+                Route::put('/{storageItem}', [StorageItemController::class, 'update'])->middleware(HasRight::class . ':editStorageItems');
+                Route::delete('/{storageItem}', [StorageItemController::class, 'destroy'])->middleware(HasRight::class . ':editStorageItems');
             });
 
             Route::prefix('settings')->group(function() {
                 Route::prefix('option-types')->group(function() {
-                    Route::get('/', [OptionsTypeController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::get('all', [OptionsTypeController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::post('/', [OptionsTypeController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::put('/{optionsType}', [OptionsTypeController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::delete('/{optionsType}', [OptionsTypeController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::get('/', [OptionsTypeController::class, 'index'])->middleware(HasRight::class . ':viewOptionsTypes');
+                    Route::get('all', [OptionsTypeController::class, 'all'])->middleware(HasRight::class . ':viewOptionsTypes');
+                    Route::post('/', [OptionsTypeController::class, 'store'])->middleware(HasRight::class . ':editOptionsTypes');
+                    Route::put('/{optionsType}', [OptionsTypeController::class, 'update'])->middleware(HasRight::class . ':editOptionsTypes');
+                    Route::delete('/{optionsType}', [OptionsTypeController::class, 'destroy'])->middleware(HasRight::class . ':editOptionsTypes');
                 });
                 Route::prefix('options')->group(function() {
-                    Route::get('/', [OptionsController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::get('all', [OptionsController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::post('/', [OptionsController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::put('/{option}', [OptionsController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::delete('/{option}', [OptionsController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::get('/', [OptionsController::class, 'index'])->middleware(HasRight::class . ':viewOptions');
+                    Route::get('all', [OptionsController::class, 'all'])->middleware(HasRight::class . ':viewOptions');
+                    Route::post('/', [OptionsController::class, 'store'])->middleware(HasRight::class . ':editOptions');
+                    Route::put('/{option}', [OptionsController::class, 'update'])->middleware(HasRight::class . ':editOptions');
+                    Route::delete('/{option}', [OptionsController::class, 'destroy'])->middleware(HasRight::class . ':editOptions');
                 });
                 Route::prefix('storage-type')->group(function() {
-                    Route::get('/', [StorageTypeController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::get('all', [StorageTypeController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::post('/', [StorageTypeController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::put('/{storageType}', [StorageTypeController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::delete('/{storageType}', [StorageTypeController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::get('/', [StorageTypeController::class, 'index'])->middleware(HasRight::class . ':viewStorageTypes');
+                    Route::get('all', [StorageTypeController::class, 'all'])->middleware(HasRight::class . ':viewStorageTypes');
+                    Route::post('/', [StorageTypeController::class, 'store'])->middleware(HasRight::class . ':editStorageTypes');
+                    Route::put('/{storageType}', [StorageTypeController::class, 'update'])->middleware(HasRight::class . ':editStorageTypes');
+                    Route::delete('/{storageType}', [StorageTypeController::class, 'destroy'])->middleware(HasRight::class . ':editStorageTypes');
                 });
                 Route::prefix('storage')->group(function() {
-                    Route::get('/', [StorageController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::get('all', [StorageController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::post('/', [StorageController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::put('/{storageType}', [StorageController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::delete('/{storageType}', [StorageController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::get('/', [StorageController::class, 'index'])->middleware(HasRight::class . ':viewStorage');
+                    Route::get('all', [StorageController::class, 'all'])->middleware(HasRight::class . ':viewStorage');
+                    Route::post('/', [StorageController::class, 'store'])->middleware(HasRight::class . ':editStorage');
+                    Route::put('/{storageType}', [StorageController::class, 'update'])->middleware(HasRight::class . ':editStorage');
+                    Route::delete('/{storageType}', [StorageController::class, 'destroy'])->middleware(HasRight::class . ':editStorage');
                 });
                 Route::prefix('room')->group(function() {
-                    Route::get('/', [RoomController::class, 'index'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::get('all', [RoomController::class, 'all'])->middleware(HasRight::class . ':viewCinemaSettings');
-                    Route::post('/', [RoomController::class, 'store'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::put('/{room}', [RoomController::class, 'update'])->middleware(HasRight::class . ':editCinemaSettings');
-                    Route::delete('/{room}', [RoomController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaSettings');
+                    Route::get('/', [RoomController::class, 'index'])->middleware(HasRight::class . ':viewRooms');
+                    Route::get('all', [RoomController::class, 'all'])->middleware(HasRight::class . ':viewRooms');
+                    Route::post('/', [RoomController::class, 'store'])->middleware(HasRight::class . ':editRooms');
+                    Route::put('/{room}', [RoomController::class, 'update'])->middleware(HasRight::class . ':editRooms');
+                    Route::delete('/{room}', [RoomController::class, 'destroy'])->middleware(HasRight::class . ':editRooms');
                 });
             });
         });
@@ -141,8 +141,8 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
         Route::get('/', [UserController::class, 'index'])->middleware(HasRight::class . ':viewUsers');
         Route::post('/', [RegisterController::class, 'registerUser'])->middleware(HasRight::class . ':addUser');
         Route::prefix('{user}')->group(function() {
-            Route::post('roles', [UserController::class, 'setRoles'])->middleware(HasRight::class . ':editUserRoles');
-            Route::post('rights', [UserController::class, 'setRights'])->middleware(HasRight::class . ':editUserRights');
+            Route::post('roles', [UserController::class, 'setRoles'])->middleware(HasRight::class . ':editUser');
+            Route::post('rights', [UserController::class, 'setRights'])->middleware(HasRight::class . ':editUser');
             Route::get('/', [UserController::class, 'show'])->middleware(HasRight::class . ':viewUsers');
             Route::put('/', [UserController::class, 'update'])->middleware(HasRight::class . ':editUser');
             Route::delete('/', [UserController::class, 'destroy'])->middleware(HasRight::class . ':deleteUser');

@@ -18,6 +18,10 @@ class LoginController extends Controller
         $user->isSuperAdmin = $user->isSuperAdmin();
         $user->entities = $user->getEntityList();
         $user->load('roles');
+        foreach ($user->roles as $role) {
+            $role->rights = $role->getRights();
+        }
+        $user->rights = $user->getRights();
 
         return $user;
     }

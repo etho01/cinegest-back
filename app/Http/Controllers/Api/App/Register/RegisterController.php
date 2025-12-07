@@ -23,7 +23,7 @@ class RegisterController extends Controller
         ]);
 
         if (static::userExist($request->email, 0)) {
-            return response()->json(['message' => 'User already exists'], 409);
+            throw new \App\Exceptions\UserAlreadyExist();
         }
     
         $user = User::create([
@@ -54,7 +54,7 @@ class RegisterController extends Controller
         ]);
 
         if (static::userExist($request->email, $entity)) {
-            return response()->json(['message' => 'User already exists'], 409);
+            throw new \App\Exceptions\UserAlreadyExist();
         }
     
         $user = User::create([
@@ -67,7 +67,7 @@ class RegisterController extends Controller
             'phone' => $request->phone ?? null,
         ]);
 
-        foreach ($request->roles as $roleData) {
+        foreach ($request->input('roles', []) as $roleData) {
             $userRole = new RoleUser();
             $userRole->user_id = $user->id;
             $userRole->role_id = $roleData['role_id'];
