@@ -164,4 +164,11 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
         Route::put('/{role}', [RoleController::class, 'update'])->middleware(HasRight::class . ':editRole');
         Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware(HasRight::class . ':deleteRole');
     });
+
+    Route::prefix('cinema-api')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'index'])->middleware(HasRight::class . ':viewCinemaApis');
+        Route::post('/', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'store'])->middleware(HasRight::class . ':editCinemaApi');
+        Route::put('/{cinemaApi}', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'update'])->middleware(HasRight::class . ':editCinemaApi');
+        Route::delete('/{cinemaApi}', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaApi');
+    });
 });
