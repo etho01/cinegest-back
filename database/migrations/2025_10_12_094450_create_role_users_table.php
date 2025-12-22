@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Cinema;
+use App\Models\Entity\Cinema;
 use App\Models\Role\Role;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
