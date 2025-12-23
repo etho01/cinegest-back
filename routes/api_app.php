@@ -19,9 +19,7 @@ use App\Http\Controllers\Api\App\Entity\Cinema\Settings\RoomController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageTypeController;
 use App\Http\Controllers\Api\App\Entity\Cinema\Settings\StorageController;
 use App\Http\Controllers\Api\App\Entity\Cinema\StorageItemController;
-use App\Models\Role\Role;
 use Illuminate\Support\Facades\Route;
-use Termwind\Components\Raw;
 
 Route::prefix('auth')->group(function (){
     Route::post('login', LoginController::class);

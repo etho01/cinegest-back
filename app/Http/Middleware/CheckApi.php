@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\CinemaApi;
 
 class CheckApi
 {
@@ -17,7 +18,7 @@ class CheckApi
     {
         $api = CinemaApi::where('apiKey', $request->header('X-API-KEY'))->first();
         if (!$api) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $request->attributes->set('cinemaApi', $api);
