@@ -28,7 +28,7 @@ class OptionsController extends Controller
     public function all(Int $entityId, Int $cinemaId)
     {
         return Option::
-            select('id', 'name', 'options_type_id', DB::raw('options_type_id as option_type_id'))
+            select('id', 'name', 'options_type_id', 'price', DB::raw('options_type_id as option_type_id'))
             ->where('cinema_id', $cinemaId)
             ->get();
     }
@@ -38,11 +38,13 @@ class OptionsController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'option_type_id' => 'required|integer|exists:options_types,id',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
         $option = new Option($validated);
         $option->options_type_id = $validated['option_type_id'];
         $option->cinema_id = $cinemaId;
+        $option->price = $request->input('price', 0);
         $option->save();
 
         return response()->json($option, 200);
@@ -55,10 +57,12 @@ class OptionsController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'option_type_id' => 'required|integer|exists:options_types,id',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
         $option->update($validated);
         $option->options_type_id = $validated['option_type_id'];
+        $option->price = $request->input('price', 0);
         $option->save();
 
         return response()->json($option);

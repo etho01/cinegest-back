@@ -19,4 +19,9 @@ class CinemaApi extends Model
     {
         return $this->belongsToMany(Cinema::class, 'cinema_apis_cinema', 'cinemaApiId', 'cinemaId');
     }
+
+    public function prices()
+    {
+        return $this->hasMany(CinemaApi\Price::class, 'cinema_api_id');
+    }
 }

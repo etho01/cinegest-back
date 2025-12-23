@@ -9,6 +9,7 @@ class Option extends Model
     protected $fillable = [
         'name',
         'options_type_id',
+        'price',
     ];
 
     public function type()

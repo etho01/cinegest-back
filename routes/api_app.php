@@ -170,5 +170,14 @@ Route::prefix('entity/{entity}')->middleware('auth:sanctum')->group(function () 
         Route::post('/', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'store'])->middleware(HasRight::class . ':editCinemaApi');
         Route::put('/{cinemaApi}', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'update'])->middleware(HasRight::class . ':editCinemaApi');
         Route::delete('/{cinemaApi}', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaApi');
+
+        Route::prefix('{cinemaApi}')->group(function() {
+            Route::get('/', [\App\Http\Controllers\Api\App\Entity\CinemaApiController::class, 'show'])->middleware(HasRight::class . ':viewCinemaApiDetails');
+            Route::prefix('price')->group(function() {
+                Route::post('/', [\App\Http\Controllers\Api\App\Entity\CinemaApi\PriceController::class, 'store'])->middleware(HasRight::class . ':editCinemaApiPrices');
+                Route::put('/{price}', [\App\Http\Controllers\Api\App\Entity\CinemaApi\PriceController::class, 'update'])->middleware(HasRight::class . ':editCinemaApiPrices');
+                Route::delete('/{price}', [\App\Http\Controllers\Api\App\Entity\CinemaApi\PriceController::class, 'destroy'])->middleware(HasRight::class . ':editCinemaApiPrices');
+            });
+        });
     });
 });

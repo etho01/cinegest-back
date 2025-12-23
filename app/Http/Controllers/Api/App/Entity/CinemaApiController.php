@@ -34,6 +34,11 @@ class CinemaApiController extends Controller
         return $cinemaApi;
     }
 
+    public function show(Int $entityId, Int $id )
+    {
+        return CinemaApi::with('cinemas', 'prices')->findOrFail($id);
+    }
+
     public function update(Request $request, Int $entityId, Int $id )
     {
         $data = $request->validate([
