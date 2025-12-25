@@ -58,21 +58,15 @@ class MovieController extends Controller
     public function store(Request $request, Int $entityId, Int $cinemaId)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'releaseDate' => 'required|date',
             'externalId' => 'required',
             'size' => 'nullable|numeric',
         ]);
 
-        $durationMinutes = MovieApi::getDetails($validated['externalId'])['runtime'] ?? 0;
-        $validated['durationMinutes'] = $durationMinutes;
-
-        $movie = new Movie($validated);
-        $movie->cinema_id = $cinemaId;
-        $movie->durationMinutes = $durationMinutes;
-        $movie->size = $request->input('size', 0);
-        $movie->save();
+        CreateMovie::execute(
+            $validated['externalId'],
+            $cinemaId,
+            $validated['size'] ?? 0
+        );
 
         return response()->json(['message' => 'Movie created successfully'], 201);
     }
