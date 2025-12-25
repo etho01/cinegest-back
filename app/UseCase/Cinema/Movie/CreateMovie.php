@@ -4,7 +4,7 @@ class CreateMovie
 {
     public function execute(string $externalId, Int $cinemaId, Int $size): Movie
     {
-        $movieCache = MovieCache::createIfNotExist($externalId,);
+        $movieCache = MovieCache::createIfNotExist($externalId);
         $durationMinutes = $movieCache->duration ?? 0;
 
         $movie = new Movie();
