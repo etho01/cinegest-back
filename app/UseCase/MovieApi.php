@@ -147,6 +147,7 @@ class MovieApi implements MovieApiInterface
             }, $data['genres'] ?? []),
             'director' => $director,
             'duration' => $duration,
+            'durationMinutes' => $data['runtime'] ?? 0,
             'ageRating' => $ageRating,
             'description' => $data['overview'] ?? null,
             'logoUrl' => $logoUrl,

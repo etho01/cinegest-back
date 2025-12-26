@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\App\Entity\Cinema;
 
 use App\Http\Controllers\Controller;
 use App\Models\Movie;
+use App\UseCase\Cinema\Movie\CreateMovie;
 use App\UseCase\MovieApi;
 use Illuminate\Http\Request;
 
@@ -62,7 +63,7 @@ class MovieController extends Controller
             'size' => 'nullable|numeric',
         ]);
 
-        CreateMovie::execute(
+        CreateMovie::handle(
             $validated['externalId'],
             $cinemaId,
             $validated['size'] ?? 0

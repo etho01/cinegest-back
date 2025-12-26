@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Cinema\Settings\Option;
 use App\Models\Entity\Cinema;
 use App\Models\Movie\MovieVersion;
 use Illuminate\Database\Eloquent\Model;

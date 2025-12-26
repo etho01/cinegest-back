@@ -24,4 +24,15 @@ class CinemaApi extends Model
     {
         return $this->hasMany(CinemaApi\Price::class, 'cinema_api_id');
     }
+
+    public function cinemaIdsIsValid(array $cinemaIds): bool
+    {
+        $validCinemaIds = $this->cinemas()->pluck('cinemas.id')->toArray();
+        foreach ($cinemaIds as $cinemaId) {
+            if (!in_array($cinemaId, $validCinemaIds)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

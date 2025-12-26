@@ -22,6 +22,7 @@ class MovieCache extends Model
         'rating',
         'ratingCount',
         'cast',
+        'durationMinutes',
     ];
 
     protected $casts = [
@@ -45,5 +46,27 @@ class MovieCache extends Model
         }
         
         return $movieCache;
+    }
+
+    public function getSessions(array $cinemaIds = []): \Illuminate\Database\Eloquent\Collection
+    {
+        $sessions = Session::with([
+            "movieVersion" => [
+                "options"
+            ],
+        ])
+            ->whereHas('movie', function ($query) {
+                $query->where('externalId', $this->externalId);
+            })
+            ->when(!empty($cinemaIds), function ($query) use ($cinemaIds) {
+                $query->whereIn('cinemaId', $cinemaIds);
+            })
+            ->get();
+
+        foreach ($sessions as $session) {
+            $session->options = $session->movieVersion->options;
+        }
+
+        return $sessions;
     }
 }

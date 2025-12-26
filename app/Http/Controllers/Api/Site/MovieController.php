@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use App\Models\MovieCache;
 use App\Models\Session;
+use App\UseCase\Site\GetMovieWithSessions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -105,5 +106,15 @@ class MovieController extends Controller
         return response()->json(
             $movieCaches,
         );
+    }
+
+    public function getMovieWithSessions(Request $request, string $movieCacheId)
+    {
+        $cinemaApi = $request->get('cinemaApi');
+        $cinemaIds = $request->input('cinemaIds', []);
+
+        $result = GetMovieWithSessions::handle($movieCacheId, $cinemaApi, $cinemaIds);
+
+        return response()->json($result);
     }
 }

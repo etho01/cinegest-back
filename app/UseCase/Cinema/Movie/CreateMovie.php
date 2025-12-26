@@ -1,23 +1,27 @@
 <?php 
 
+namespace App\UseCase\Cinema\Movie;
+
+use App\Models\Movie;
+use App\Models\MovieCache;
+
 class CreateMovie
 {
-    public function execute(string $externalId, Int $cinemaId, Int $size): Movie
+    public static function handle(string $externalId, Int $cinemaId, Int $size): Movie
     {
         $movieCache = MovieCache::createIfNotExist($externalId);
-        $durationMinutes = $movieCache->duration ?? 0;
 
         $movie = new Movie();
         $movie->title = $movieCache->title;
         $movie->description = $movieCache->description;
         $movie->releaseDate = $movieCache->releaseDate;
+        $movie->durationMinutes = $movieCache->durationMinutes;
         $movie->externalId = $externalId;
         $movie->cinema_id = $cinemaId;
-        $movie->durationMinutes = $durationMinutes;
         $movie->size = $size;
         $movie->save();
 
 
-        return $movieCache;
+        return $movie;
     }
 }
