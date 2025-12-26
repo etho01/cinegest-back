@@ -39,12 +39,14 @@ class OptionsController extends Controller
             'name' => 'required|string|max:255',
             'option_type_id' => 'required|integer|exists:options_types,id',
             'price' => 'nullable|numeric|min:0',
+            'publicName' => 'nullable|string|max:255',
         ]);
 
         $option = new Option($validated);
         $option->options_type_id = $validated['option_type_id'];
         $option->cinema_id = $cinemaId;
         $option->price = $request->input('price', 0);
+        $option->publicName = $request->input('publicName', null);
         $option->save();
 
         return response()->json($option, 200);
@@ -58,11 +60,13 @@ class OptionsController extends Controller
             'name' => 'required|string|max:255',
             'option_type_id' => 'required|integer|exists:options_types,id',
             'price' => 'nullable|numeric|min:0',
+            'publicName' => 'nullable|string|max:255',
         ]);
 
         $option->update($validated);
         $option->options_type_id = $validated['option_type_id'];
         $option->price = $request->input('price', 0);
+        $option->publicName = $request->input('publicName', null);
         $option->save();
 
         return response()->json($option);

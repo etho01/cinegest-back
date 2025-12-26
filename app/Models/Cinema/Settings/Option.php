@@ -10,6 +10,7 @@ class Option extends Model
         'name',
         'options_type_id',
         'price',
+        'publicName',
     ];
 
     public function type()
