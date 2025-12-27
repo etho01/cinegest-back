@@ -11,3 +11,5 @@ Route::get('movie/weekly', [\App\Http\Controllers\Api\Site\MovieController::clas
 Route::prefix('movie/{movieCacheId}')->group(function () {
     Route::get('sessions', [\App\Http\Controllers\Api\Site\MovieController::class, 'getMovieWithSessions']);
 });
+
+Route::get('prices', [\App\Http\Controllers\Api\Site\PriceController::class, 'index']);

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class PriceController extends Controller
 {
-    public function store(Request $request, Int $cinemaApi)
+    public function store(Request $request, Int $entityId, Int $cinemaApi)
     {
         $data = $request->validate([
             'name' => 'required|string',
