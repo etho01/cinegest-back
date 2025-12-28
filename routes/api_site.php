@@ -13,3 +13,16 @@ Route::prefix('movie/{movieCacheId}')->group(function () {
 });
 
 Route::get('prices', [\App\Http\Controllers\Api\Site\PriceController::class, 'index']);
+
+Route::prefix('auth')->group(function() {
+    Route::post('login', \App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class);
+    Route::post('register', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'register']);
+    Route::post('forgot-password', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'sendResetLinkEmail']);
+    Route::post('reset-password', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'reset']);
+    Route::middleware('auth:sanctum')->group(function() {
+        Route::post('logout', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'logout']);
+        Route::get('me', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'me']);
+        Route::put('me', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'updateMe']);
+        Route::put('me/password', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'updateMyPassword']);
+    }); 
+});
