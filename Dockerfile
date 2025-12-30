@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
  
 # Install PHP extensions
 RUN docker-php-ext-configure pcntl --enable-pcntl
-RUN docker-php-ext-install pdo pdo_mysql zip calendar mbstring pcntl curl
+RUN docker-php-ext-install pdo pdo_mysql zip calendar mbstring pcntl curl bcmath
  
 # Copy vhost config
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf

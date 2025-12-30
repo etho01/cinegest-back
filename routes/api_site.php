@@ -14,6 +14,10 @@ Route::prefix('movie/{movieCacheId}')->group(function () {
 
 Route::get('prices', [\App\Http\Controllers\Api\Site\PriceController::class, 'index']);
 
+Route::prefix('booking')->group(function() {
+    Route::post('payment-intent', [\App\Http\Controllers\Api\Site\BookingController::class, 'paymentIntent']);
+});
+
 Route::prefix('auth')->group(function() {
     Route::post('login', \App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class);
     Route::post('register', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'register']);
