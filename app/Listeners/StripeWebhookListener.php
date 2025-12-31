@@ -4,6 +4,10 @@ namespace App\Listeners;
 
 use Laravel\Cashier\Events\WebhookReceived;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Booking;
+use App\Models\User;
+use App\Mail\BookingConfirmation;
 
 class StripeWebhookListener
 {
@@ -18,34 +22,64 @@ class StripeWebhookListener
             
             // Extract metadata
             $metadata = $paymentIntent['metadata'] ?? [];
-            $sessionId = $metadata['sessionId'] ?? null;
-            $userId = $metadata['userId'] ?? null;
-            $totalAmount = $metadata['totalAmount'] ?? null;
+            $bookingId = $metadata['bookingId'] ?? null;
             
             Log::info('Payment confirmed', [
                 'payment_intent_id' => $paymentIntent['id'],
                 'amount' => $paymentIntent['amount'] / 100, // Convert from cents
                 'currency' => $paymentIntent['currency'],
-                'session_id' => $sessionId,
-                'user_id' => $userId,
-                'total_amount' => $totalAmount,
+                'booking_id' => $bookingId,
                 'metadata' => $metadata,
             ]);
             
-            // TODO: Update your booking/order status in database
-            // TODO: Send confirmation email to customer
-            // TODO: Create ticket records
-            
-            // Example:
-            // if ($sessionId && $userId) {
-            //     Booking::where('session_id', $sessionId)
-            //         ->where('user_id', $userId)
-            //         ->update(['status' => 'paid']);
-            //     
-            //     // Send confirmation email
-            //     $user = User::find($userId);
-            //     Mail::to($user->email)->send(new BookingConfirmation($sessionId));
-            // }
+            // Update existing booking
+            if ($bookingId) {
+                try {
+                    $booking = Booking::find($bookingId);
+                    
+                    if ($booking) {
+                        // Mark booking as paid
+                        $booking->markAsPaid();
+                        
+                        Log::info('Booking marked as paid', [
+                            'booking_id' => $booking->id,
+                            'total_tickets' => $booking->total_tickets,
+                            'session_id' => $booking->session_id,
+                        ]);
+                        
+                        // Load relationships for email
+                        $booking->load(['user', 'session.cinema', 'session.movie', 'session.room', 'items']);
+                        
+                        // Send confirmation email to customer
+                        try {
+                            Mail::to($booking->user->email)->send(new BookingConfirmation($booking));
+                            
+                            Log::info('Confirmation email sent', [
+                                'booking_id' => $booking->id,
+                                'email' => $booking->user->email,
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error('Failed to send confirmation email', [
+                                'booking_id' => $booking->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                        
+                    } else {
+                        Log::warning('Booking not found for payment intent', [
+                            'booking_id' => $bookingId,
+                            'payment_intent_id' => $paymentIntent['id'],
+                        ]);
+                    }
+                    
+                } catch (\Exception $e) {
+                    Log::error('Failed to update booking', [
+                        'error' => $e->getMessage(),
+                        'booking_id' => $bookingId,
+                        'payment_intent_id' => $paymentIntent['id'],
+                    ]);
+                }
+            }
         }
         
         // Handle payment_intent.payment_failed event
@@ -58,8 +92,11 @@ class StripeWebhookListener
                 'metadata' => $paymentIntent['metadata'] ?? [],
             ]);
             
-            // TODO: Handle failed payment
-            // TODO: Notify user
+            // Mark booking as failed if it exists
+            $booking = Booking::where('payment_intent_id', $paymentIntent['id'])->first();
+            if ($booking) {
+                $booking->markAsCancelled();
+            }
         }
     }
 }
