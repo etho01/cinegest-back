@@ -4,10 +4,8 @@ namespace App\Listeners;
 
 use Laravel\Cashier\Events\WebhookReceived;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Models\Booking;
-use App\Models\User;
-use App\Mail\BookingConfirmation;
+use App\UseCase\Site\Booking\ConfirmBookingPayment;
+use App\UseCase\Site\Booking\CancelBooking;
 
 class StripeWebhookListener
 {
@@ -18,85 +16,55 @@ class StripeWebhookListener
     {
         // Handle payment_intent.succeeded event
         if ($event->payload['type'] === 'payment_intent.succeeded') {
-            $paymentIntent = $event->payload['data']['object'];
-            
-            // Extract metadata
-            $metadata = $paymentIntent['metadata'] ?? [];
-            $bookingId = $metadata['bookingId'] ?? null;
-            
-            Log::info('Payment confirmed', [
-                'payment_intent_id' => $paymentIntent['id'],
-                'amount' => $paymentIntent['amount'] / 100, // Convert from cents
-                'currency' => $paymentIntent['currency'],
-                'booking_id' => $bookingId,
-                'metadata' => $metadata,
-            ]);
-            
-            // Update existing booking
-            if ($bookingId) {
-                try {
-                    $booking = Booking::find($bookingId);
-                    
-                    if ($booking) {
-                        // Mark booking as paid
-                        $booking->markAsPaid();
-                        
-                        Log::info('Booking marked as paid', [
-                            'booking_id' => $booking->id,
-                            'total_tickets' => $booking->total_tickets,
-                            'session_id' => $booking->session_id,
-                        ]);
-                        
-                        // Load relationships for email
-                        $booking->load(['user', 'session.cinema', 'session.movie', 'session.room', 'items']);
-                        
-                        // Send confirmation email to customer
-                        try {
-                            Mail::to($booking->user->email)->send(new BookingConfirmation($booking));
-                            
-                            Log::info('Confirmation email sent', [
-                                'booking_id' => $booking->id,
-                                'email' => $booking->user->email,
-                            ]);
-                        } catch (\Exception $e) {
-                            Log::error('Failed to send confirmation email', [
-                                'booking_id' => $booking->id,
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                        
-                    } else {
-                        Log::warning('Booking not found for payment intent', [
-                            'booking_id' => $bookingId,
-                            'payment_intent_id' => $paymentIntent['id'],
-                        ]);
-                    }
-                    
-                } catch (\Exception $e) {
-                    Log::error('Failed to update booking', [
-                        'error' => $e->getMessage(),
-                        'booking_id' => $bookingId,
-                        'payment_intent_id' => $paymentIntent['id'],
-                    ]);
-                }
-            }
+            $this->handlePaymentSucceeded($event->payload);
         }
         
         // Handle payment_intent.payment_failed event
         if ($event->payload['type'] === 'payment_intent.payment_failed') {
-            $paymentIntent = $event->payload['data']['object'];
-            
-            Log::error('Payment failed', [
-                'payment_intent_id' => $paymentIntent['id'],
-                'error' => $paymentIntent['last_payment_error'] ?? null,
-                'metadata' => $paymentIntent['metadata'] ?? [],
-            ]);
-            
-            // Mark booking as failed if it exists
-            $booking = Booking::where('payment_intent_id', $paymentIntent['id'])->first();
-            if ($booking) {
-                $booking->markAsCancelled();
-            }
+            $this->handlePaymentFailed($event->payload);
+        }
+    }
+
+    /**
+     * Handle successful payment
+     */
+    private function handlePaymentSucceeded(array $payload): void
+    {
+        $paymentIntent = $payload['data']['object'];
+        $metadata = $paymentIntent['metadata'] ?? [];
+        $bookingId = $metadata['bookingId'] ?? null;
+
+        Log::info('Payment confirmed', [
+            'payment_intent_id' => $paymentIntent['id'],
+            'amount' => $paymentIntent['amount'] / 100,
+            'currency' => $paymentIntent['currency'],
+            'booking_id' => $bookingId,
+            'metadata' => $metadata,
+        ]);
+
+        if ($bookingId) {
+            ConfirmBookingPayment::handle((int) $bookingId);
+        }
+    }
+
+    /**
+     * Handle failed payment
+     */
+    private function handlePaymentFailed(array $payload): void
+    {
+        $paymentIntent = $payload['data']['object'];
+        $metadata = $paymentIntent['metadata'] ?? [];
+        $bookingId = $metadata['bookingId'] ?? null;
+
+        Log::error('Payment failed', [
+            'payment_intent_id' => $paymentIntent['id'],
+            'error' => $paymentIntent['last_payment_error'] ?? null,
+            'booking_id' => $bookingId,
+            'metadata' => $metadata,
+        ]);
+
+        if ($bookingId) {
+            CancelBooking::handle((int) $bookingId);
         }
     }
 }
