@@ -14,31 +14,36 @@ use Exception;
 
 class BookingController extends Controller
 {
+    private CreateBookingWithPaymentIntent $createBookingWithPaymentIntent;
+    private GetUserBookings $getUserBookings;
+
+    public function __construct(
+        CreateBookingWithPaymentIntent $createBookingWithPaymentIntent,
+        GetUserBookings $getUserBookings
+    ) {
+        $this->createBookingWithPaymentIntent = $createBookingWithPaymentIntent;
+        $this->getUserBookings = $getUserBookings;
+    }
+
     /**
      * Create a payment intent for booking tickets
-     *
-     * @param BookingPaymentIntentRequest $request
-     * @return JsonResponse
      */
     public function paymentIntent(BookingPaymentIntentRequest $request): JsonResponse
     {
-            $result = CreateBookingWithPaymentIntent::handle($request->validated());
+        $result = $this->createBookingWithPaymentIntent->handle($request->validated());
 
-            $paymentIntentData = [
-                'clientSecret' => $result['payment']->client_secret,
-                'paymentIntentId' => $result['payment']->id,
-            ];
+        $paymentIntentData = [
+            'clientSecret' => $result['payment']->client_secret,
+            'paymentIntentId' => $result['payment']->id,
+        ];
 
-            return response()->json(
-                new PaymentIntentResource($paymentIntentData)
-            );
+        return response()->json(
+            new PaymentIntentResource($paymentIntentData)
+        );
     }
 
     /**
      * Get authenticated user's bookings
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function myBookings(Request $request): JsonResponse
     {
@@ -46,7 +51,7 @@ class BookingController extends Controller
             $userId = $request->user()->id;
             $status = $request->query('status'); // optional filter: pending, paid, cancelled
 
-            $bookings = GetUserBookings::handle($userId, $status);
+            $bookings = $this->getUserBookings->handle($userId, $status);
 
             return response()->json(BookingResource::collection($bookings));
         } catch (Exception $e) {

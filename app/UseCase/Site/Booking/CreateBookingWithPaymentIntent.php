@@ -4,37 +4,50 @@ namespace App\UseCase\Site\Booking;
 
 use App\Repository\BookingRepository;
 use App\Repository\BookingItemRepository;
-use App\Models\User;
-use App\Models\Booking;
-use App\Models\Session;
+use App\Repository\SessionRepository;
+use App\Repository\UserRepository;
 use App\Exceptions\Site\InsufficientCapacityException;
 use Illuminate\Support\Facades\DB;
 
 class CreateBookingWithPaymentIntent
 {
+    private BookingRepository $bookingRepository;
+    private BookingItemRepository $bookingItemRepository;
+    private SessionRepository $sessionRepository;
+    private UserRepository $userRepository;
+
+    public function __construct(
+        BookingRepository $bookingRepository,
+        BookingItemRepository $bookingItemRepository,
+        SessionRepository $sessionRepository,
+        UserRepository $userRepository
+    ) {
+        $this->bookingRepository = $bookingRepository;
+        $this->bookingItemRepository = $bookingItemRepository;
+        $this->sessionRepository = $sessionRepository;
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * Create a booking and initiate payment
      */
-    public static function handle(array $data): array
+    public function handle(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            $bookingRepository = new BookingRepository();
-            $bookingItemRepository = new BookingItemRepository();
-            
             // Calculate total tickets
-            $totalTickets = self::calculateTotalTickets($data['items']);
+            $totalTickets = $this->calculateTotalTickets($data['items']);
 
             // Get session and verify capacity
-            $session = Session::with('room')->findOrFail($data['sessionId']);;
+            $session = $this->sessionRepository->findWithRelations($data['sessionId'], ['room']);
 
-            $availableSeats = $session->room->capacity - $bookingRepository->getTotalTicketsSold($data['sessionId']);
+            $availableSeats = $session->room->capacity - $this->bookingRepository->getTotalTicketsSold($data['sessionId']);
             
             if ($availableSeats < $totalTickets) {
                 throw new InsufficientCapacityException($totalTickets, $availableSeats);
             }
 
             // Create booking
-            $booking = $bookingRepository->create([
+            $booking = $this->bookingRepository->create([
                 'user_id' => $data['userId'],
                 'session_id' => $data['sessionId'],
                 'payment_intent_id' => '', // Will be updated after payment intent creation
@@ -45,10 +58,10 @@ class CreateBookingWithPaymentIntent
             ]);
 
             // Create booking items
-            $bookingItemRepository->createMany($booking->id, $data['items']);
+            $this->bookingItemRepository->createMany($booking->id, $data['items']);
 
             // Get user and create payment intent
-            $user = User::findOrFail($data['userId']);
+            $user = $this->userRepository->find($data['userId']);
             $amountInCents = (int) ($data['totalAmount'] * 100);
 
             $payment = $user->pay($amountInCents, [
@@ -61,7 +74,7 @@ class CreateBookingWithPaymentIntent
             ]);
 
             // Update booking with payment intent ID
-            $bookingRepository->update($booking, [
+            $this->bookingRepository->update($booking, [
                 'payment_intent_id' => $payment->id,
             ]);
 
@@ -75,7 +88,7 @@ class CreateBookingWithPaymentIntent
     /**
      * Calculate total tickets from items
      */
-    private static function calculateTotalTickets(array $items): int
+    private function calculateTotalTickets(array $items): int
     {
         $total = 0;
         foreach ($items as $item) {

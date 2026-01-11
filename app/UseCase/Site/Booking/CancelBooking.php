@@ -8,14 +8,19 @@ use Illuminate\Support\Facades\Log;
 
 class CancelBooking
 {
+    private BookingRepository $bookingRepository;
+
+    public function __construct(BookingRepository $bookingRepository)
+    {
+        $this->bookingRepository = $bookingRepository;
+    }
+
     /**
      * Cancel a booking
      */
-    public static function handle(int $bookingId): ?Booking
+    public function handle(int $bookingId): ?Booking
     {
-        $bookingRepository = new BookingRepository();
-        
-        $booking = $bookingRepository->find($bookingId);
+        $booking = $this->bookingRepository->find($bookingId);
 
         if (!$booking) {
             Log::warning('Booking not found for cancellation', [

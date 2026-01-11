@@ -7,13 +7,18 @@ use Illuminate\Database\Eloquent\Collection;
 
 class GetUserBookings
 {
+    private BookingRepository $bookingRepository;
+
+    public function __construct(BookingRepository $bookingRepository)
+    {
+        $this->bookingRepository = $bookingRepository;
+    }
+
     /**
      * Get all bookings for a user
      */
-    public static function handle(int $userId, ?string $status = null): Collection
+    public function handle(int $userId, ?string $status = null): Collection
     {
-        $bookingRepository = new BookingRepository();
-        
-        return $bookingRepository->getUserBookings($userId, $status);
+        return $this->bookingRepository->getUserBookings($userId, $status);
     }
 }

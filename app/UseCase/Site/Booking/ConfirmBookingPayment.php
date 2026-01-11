@@ -10,14 +10,19 @@ use App\Mail\BookingConfirmation;
 
 class ConfirmBookingPayment
 {
+    private BookingRepository $bookingRepository;
+
+    public function __construct(BookingRepository $bookingRepository)
+    {
+        $this->bookingRepository = $bookingRepository;
+    }
+
     /**
      * Confirm booking payment and send notification
      */
-    public static function handle(int $bookingId): ?Booking
+    public function handle(int $bookingId): ?Booking
     {
-        $bookingRepository = new BookingRepository();
-        
-        $booking = $bookingRepository->findWithRelations($bookingId, [
+        $booking = $this->bookingRepository->findWithRelations($bookingId, [
             'user',
             'session.cinema',
             'session.movie',
@@ -42,7 +47,7 @@ class ConfirmBookingPayment
         ]);
 
         // Send confirmation email
-        self::sendConfirmationEmail($booking);
+        $this->sendConfirmationEmail($booking);
 
         return $booking;
     }
@@ -50,7 +55,7 @@ class ConfirmBookingPayment
     /**
      * Send confirmation email to customer
      */
-    private static function sendConfirmationEmail(Booking $booking): void
+    private function sendConfirmationEmail(Booking $booking): void
     {
         try {
             Mail::to($booking->user->email)->send(new BookingConfirmation($booking));

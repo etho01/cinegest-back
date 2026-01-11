@@ -9,6 +9,11 @@ use App\UseCase\Site\Booking\CancelBooking;
 
 class StripeWebhookListener
 {
+    public function __construct(
+        private ConfirmBookingPayment $confirmBookingPayment,
+        private CancelBooking $cancelBooking
+    ) {}
+
     /**
      * Handle the Stripe webhook event.
      */
@@ -43,7 +48,7 @@ class StripeWebhookListener
         ]);
 
         if ($bookingId) {
-            ConfirmBookingPayment::handle((int) $bookingId);
+            $this->confirmBookingPayment->handle((int) $bookingId);
         }
     }
 
@@ -64,7 +69,7 @@ class StripeWebhookListener
         ]);
 
         if ($bookingId) {
-            CancelBooking::handle((int) $bookingId);
+            $this->cancelBooking->handle((int) $bookingId);
         }
     }
 }
