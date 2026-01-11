@@ -3,14 +3,25 @@
 namespace App\UseCase\Site;
 
 use App\Exceptions\Site\CinemaNotAllowed;
+use App\Repository\MovieCacheRepository;
 use App\Models\CinemaApi;
-use App\Models\MovieCache;
 
 class GetMovieWithSessions
 {
-    public static function handle(string $movieCacheId, CinemaApi $cinemaApi, array $cinemaIds = []): array
+    private MovieCacheRepository $movieCacheRepository;
+
+    public function __construct(MovieCacheRepository $movieCacheRepository)
     {
-        $movieCache = MovieCache::findOrFail($movieCacheId);
+        $this->movieCacheRepository = $movieCacheRepository;
+    }
+
+    public function handle(string $movieCacheId, CinemaApi $cinemaApi, array $cinemaIds = []): array
+    {
+        $movieCache = $this->movieCacheRepository->find($movieCacheId);
+
+        if (!$movieCache) {
+            throw new \Exception('Movie cache not found');
+        }
 
         if (!empty($cinemaIds) && !$cinemaApi->cinemaIdsIsValid($cinemaIds)) {
             throw new CinemaNotAllowed();
