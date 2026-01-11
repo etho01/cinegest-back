@@ -163,9 +163,11 @@ class LoginController extends Controller
             ]
         );
 
+        $api = $request->get('cinemaApi');
+
         // Envoyer l'email
         try {
-            Mail::to($user->email)->send(new ResetPasswordMail($user, $token, env('APP_FRONTEND_URL')));
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $token, $api->websiteUrl));
             
             return response()->json([
                 'message' => 'Si cette adresse email existe dans notre système, vous recevrez un lien de réinitialisation.'
