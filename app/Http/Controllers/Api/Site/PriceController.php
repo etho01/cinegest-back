@@ -3,23 +3,24 @@
 namespace App\Http\Controllers\Api\Site;
 
 use App\Http\Controllers\Controller;
-use App\Models\CinemaApi\Price;
-use App\Models\Entity\Cinema;
+use App\UseCase\Site\Price\GetPrices;
 use Illuminate\Http\Request;
 
 class PriceController extends Controller
 {
+    private GetPrices $getPrices;
+
+    public function __construct(GetPrices $getPrices)
+    {
+        $this->getPrices = $getPrices;
+    }
+
     public function index(Request $request)
     {
-        $cinemaSpecificPrices = [];
-
         $cinemaApi = $request->get('cinemaApi');
+        
+        $prices = $this->getPrices->handle($cinemaApi);
 
-        $cinemaSpecificPrices = Cinema::with('options')->whereIn("id", $cinemaApi->cinemas->pluck("id"))->get();
-
-        return response()->json([
-            "generalPrices" => Price::where('cinema_api_id', $cinemaApi->id)->get(),
-            "cinemaSpecificPrices" => $cinemaSpecificPrices,
-        ]);
+        return response()->json($prices);
     }
 }

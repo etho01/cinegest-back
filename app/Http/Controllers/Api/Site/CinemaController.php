@@ -9,6 +9,8 @@ class CinemaController extends Controller
 {
     public function index(Request $request)
     {
-        return $request->get('cinemaApi')->cinemas;
+        $cinemaApi = $request->get('cinemaApi');
+        
+        return response()->json($cinemaApi->cinemas);
     }
 }
