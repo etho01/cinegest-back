@@ -5,6 +5,7 @@ namespace App\Http\Resources\Api\App\Entity\Cinema;
 use App\Http\Resources\Api\App\Entity\Cinema\Settings\RoomResource;
 use App\Models\Cinema\Key;
 use App\Models\Cinema\StorageItem;
+use App\Repository\BookingRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,9 @@ class SessionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        $bookingRepository = new BookingRepository();
+
         return [
             'id' => $this->id,
             'movieVersion' => new MovieVersionResource($this->whenLoaded('movieVersion')),
@@ -27,6 +31,7 @@ class SessionResource extends JsonResource
             'status' => $this->status,
             'statusKey' => $this->statusKey(),
             'statusServer' => $this->getStatusServer(),
+            "nbSeatsSold" => $bookingRepository->getTotalTicketsSold($this->id),
         ];
     }
     
