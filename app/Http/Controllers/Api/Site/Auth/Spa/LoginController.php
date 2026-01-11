@@ -4,29 +4,49 @@ namespace App\Http\Controllers\Api\Site\Auth\Spa;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Mail\ResetPasswordMail;
-use App\Models\User;
+use App\UseCase\Site\Auth\LoginUser;
+use App\UseCase\Site\Auth\RegisterUser;
+use App\UseCase\Site\Auth\UpdateUserProfile;
+use App\UseCase\Site\Auth\UpdateUserPassword;
+use App\UseCase\Site\Auth\SendPasswordResetLink;
+use App\UseCase\Site\Auth\ResetPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\FacadesDB;
-use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
+    private LoginUser $loginUser;
+    private RegisterUser $registerUser;
+    private UpdateUserProfile $updateUserProfile;
+    private UpdateUserPassword $updateUserPassword;
+    private SendPasswordResetLink $sendPasswordResetLink;
+    private ResetPassword $resetPassword;
+
+    public function __construct(
+        LoginUser $loginUser,
+        RegisterUser $registerUser,
+        UpdateUserProfile $updateUserProfile,
+        UpdateUserPassword $updateUserPassword,
+        SendPasswordResetLink $sendPasswordResetLink,
+        ResetPassword $resetPassword
+    ) {
+        $this->loginUser = $loginUser;
+        $this->registerUser = $registerUser;
+        $this->updateUserProfile = $updateUserProfile;
+        $this->updateUserPassword = $updateUserPassword;
+        $this->sendPasswordResetLink = $sendPasswordResetLink;
+        $this->resetPassword = $resetPassword;
+    }
+
     public function me(Request $request)
     {
-        $user = $request->user();
-        return $user;
+        return $request->user();
     }
 
     public function updateMe(Request $request)
     {
-        $user = Auth::user();
         $validated = $request->validate([
             'firstname' => 'sometimes|required|string|max:100',
             'lastname' => 'sometimes|required|string|max:100',
@@ -34,61 +54,54 @@ class LoginController extends Controller
             'phone' => 'sometimes|nullable|string|max:20',
         ]);
 
-        $user->update($validated);
+        $user = $this->updateUserProfile->handle(Auth::user(), $validated);
+        
         return response()->json($user);
     }
 
     public function updateMyPassword(Request $request)
     {
-        $user = Auth::user();
         $validated = $request->validate([
             'actualPassword' => 'required|string',
             'newPassword' => 'required|string|min:8',
             'newPasswordConfirmation' => 'required|string|same:newPassword',
         ]);
 
-        if (!Hash::check($validated['actualPassword'], $user->password)) {
-            return response()->json(['error' => 'CURRENT_PASSWORD_INCORRECT'], 422);
-        }
+        $result = $this->updateUserPassword->handle(
+            Auth::user(),
+            $validated['actualPassword'],
+            $validated['newPassword']
+        );
 
-        $user->password = Hash::make($validated['newPassword']);
-        $user->save();
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 422);
+        }
 
         return response()->json(['success' => 'PASSWORD_UPDATED']);
     }
 
     public function __invoke(Request $request)
     {
-        if (Auth::check())
-        {
-            return ["error" => 'USER_ALREADY_LOG'];
-        }
-        
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return $validator->errors();
         }
 
-        $credentials = [
-            'type' => 'website',
-            'origin_id' => $request->get('cinemaApi')->id,
-            'email' => $request->email,
-            'password' => $request->password
-        ];
+        $result = $this->loginUser->handle(
+            $request->email,
+            $request->password,
+            $request->get('cinemaApi')->id
+        );
 
-        if (Auth::attempt($credentials)) {
-
-            $token = $request->user()->createToken('auth-token');
-
-            return ["success" => "LOG_IN", 'token' => $token->plainTextToken];
+        if (!$result['success']) {
+            return ["error" => $result['error']];
         }
 
-        return ["error" => "BAD_CREDENTIAL"];
+        return ["success" => "LOG_IN", 'token' => $result['token']];
     }
 
     public function logout(Request $request)
@@ -100,7 +113,7 @@ class LoginController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'firstname' => ['required', 'string', 'max:100'],
             'lastname' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255'],
@@ -109,24 +122,19 @@ class LoginController extends Controller
             'passwordConfirmation' => 'required|string|same:password',
         ]);
 
-        if (User::where('type', 'website')->where('origin_id', $request->get('cinemaApi')->id)->where('email', $request->email)->exists()) {
-            $validator->errors()->add('email', 'The email has already been taken.');
-        }
-
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return $validator->errors();
         }
 
-        $user = \App\Models\User::create([
-            'type' => 'website',
-            'origin_id' => $request->get('cinemaApi')->id,
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-        ]);
+        $result = $this->registerUser->handle(
+            $request->only(['firstname', 'lastname', 'email', 'phone', 'password']),
+            $request->get('cinemaApi')->id
+        );
+
+        if (!$result['success']) {
+            $validator->errors()->add('email', 'The email has already been taken.');
+            return $validator->errors();
+        }
 
         return response()->json(['success' => 'USER_REGISTERED']);
     }
@@ -139,44 +147,24 @@ class LoginController extends Controller
         $request->validate([
             'email' => 'required|email'
         ]);
-        $user = User::where('email', $request->email)
-            ->where('type', 'website')
-            ->where('origin_id', $request->get('cinemaApi')->id)
-            ->first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'Si cette adresse email existe dans notre système, vous recevrez un lien de réinitialisation.'
-            ], 200);
-        }
-
-        // Générer un token de réinitialisation
-        $token = Str::random(64);
-        
-        // Stocker le token dans la base de données
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'email' => $request->email,
-                'token' => Hash::make($token),
-                'created_at' => now()
-            ]
-        );
 
         $api = $request->get('cinemaApi');
 
-        // Envoyer l'email
-        try {
-            Mail::to($user->email)->send(new ResetPasswordMail($user, $token, $api->websiteUrl));
-            
-            return response()->json([
-                'message' => 'Si cette adresse email existe dans notre système, vous recevrez un lien de réinitialisation.'
-            ], 200);
-        } catch (\Exception $e) {
+        $result = $this->sendPasswordResetLink->handle(
+            $request->email,
+            $api->id,
+            $api->websiteUrl
+        );
+
+        if (!$result['success']) {
             return response()->json([
                 'message' => 'Une erreur est survenue lors de l\'envoi de l\'email.'
             ], 500);
         }
+
+        return response()->json([
+            'message' => 'Si cette adresse email existe dans notre système, vous recevrez un lien de réinitialisation.'
+        ], 200);
     }
 
     /**
@@ -184,92 +172,32 @@ class LoginController extends Controller
      */
     public function reset(ResetPasswordRequest $request): JsonResponse
     {
-        $tokenData = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->first();
+        $result = $this->resetPassword->handle(
+            $request->email,
+            $request->token,
+            $request->password
+        );
 
-        if (!$tokenData) {
-            return response()->json([
-                'message' => 'Token invalide ou expiré.'
-            ], 400);
-        }
+        if (!$result['success']) {
+            $statusCode = match($result['error']) {
+                'TOKEN_EXPIRED' => 400,
+                'INVALID_TOKEN' => 400,
+                'USER_NOT_FOUND' => 404,
+                default => 500
+            };
 
-        // Vérifier que le token n'est pas expiré (24 heures)
-        if (now()->diffInHours($tokenData->created_at) > 24) {
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            return response()->json([
-                'message' => 'Token expiré. Veuillez faire une nouvelle demande de réinitialisation.'
-            ], 400);
-        }
+            $message = match($result['error']) {
+                'TOKEN_EXPIRED' => 'Token invalide ou expiré.',
+                'INVALID_TOKEN' => 'Token invalide ou expiré.',
+                'USER_NOT_FOUND' => 'Utilisateur non trouvé.',
+                default => 'Une erreur est survenue.'
+            };
 
-        // Vérifier le token
-        if (!Hash::check($request->token, $tokenData->token)) {
-            return response()->json([
-                'message' => 'Token invalide.'
-            ], 400);
-        }
-
-        // Trouver l'utilisateur et mettre à jour son mot de passe
-        $user = User::where('email', $request->email)
-            ->where('type', 'website')
-            ->where('origin_id', $request->get('cinemaApi')->id)
-            ->first();
-        
-        if (!$user) {
-            return response()->json([
-                'message' => 'Utilisateur non trouvé.'
-            ], 404);
-        }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        // Supprimer le token utilisé
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-        return response()->json([
-            'message' => 'Mot de passe réinitialisé avec succès.'
-        ], 200);
-    }
-
-    public function verifyToken(Request $request): JsonResponse
-    {
-        $request->validate([
-            'token' => 'required|string',
-            'email' => 'required|email'
-        ]);
-
-        $tokenData = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->first();
-
-        if (!$tokenData) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Token invalide.'
-            ], 400);
-        }
-
-        // Vérifier que le token n'est pas expiré
-        if (now()->diffInHours($tokenData->created_at) > 24) {
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            return response()->json([
-                'valid' => false,
-                'message' => 'Token expiré.'
-            ], 400);
-        }
-
-        // Vérifier le token
-        if (!Hash::check($request->token, $tokenData->token)) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Token invalide.'
-            ], 400);
+            return response()->json(['message' => $message], $statusCode);
         }
 
         return response()->json([
-            'valid' => true,
-            'message' => 'Token valide.'
+            'message' => 'Votre mot de passe a été réinitialisé avec succès.'
         ], 200);
     }
 }
