@@ -18,6 +18,7 @@ class CinemaApiController extends Controller
         $data = $request->validate([
             'entityId' => 'required|integer',
             'name' => 'required|string',
+            'websiteUrl' => 'nullable|url',
             'cinemaIds' => 'array',
         ]);
 
@@ -25,6 +26,7 @@ class CinemaApiController extends Controller
             'entityId' => $data['entityId'],
             'apiKey' => bin2hex(random_bytes(16)),
             'name' => $data['name'],
+            'websiteUrl' => $data['websiteUrl'] ?? null,
         ]);
 
         if (isset($data['cinemaIds'])) {
@@ -44,6 +46,7 @@ class CinemaApiController extends Controller
         $data = $request->validate([
             'entityId' => 'required|integer',
             'name' => 'required|string',
+            'websiteUrl' => 'nullable|url',
             'cinemaIds' => 'array',
         ]);
 
@@ -51,6 +54,7 @@ class CinemaApiController extends Controller
         $cinemaApi->update([
             'entityId' => $data['entityId'],
             'name' => $data['name'],
+            'websiteUrl' => $data['websiteUrl'] ?? null,
         ]);
 
         if (isset($data['cinemaIds'])) {

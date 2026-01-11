@@ -13,6 +13,7 @@ class CinemaApi extends Model
         'entityId',
         'apiKey',
         'name',
+        'websiteUrl',
     ];
 
     public function cinemas()
