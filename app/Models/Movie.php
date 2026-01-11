@@ -14,6 +14,11 @@ class Movie extends Model
         'size',
     ];
 
+    public function cache()
+    {
+        return $this->hasOne(MovieCache::class, 'externalId', 'externalId');
+    }
+
     public function versions()
     {
         return $this->hasMany(\App\Models\Movie\MovieVersion::class, 'movieId');

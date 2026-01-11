@@ -18,6 +18,10 @@ Route::prefix('booking')->group(function() {
     Route::post('payment-intent', [\App\Http\Controllers\Api\Site\BookingController::class, 'paymentIntent']);
 });
 
+Route::prefix('me')->middleware('auth:sanctum')->group(function() {
+    Route::get('bookings', [\App\Http\Controllers\Api\Site\BookingController::class, 'myBookings']);
+});
+
 Route::prefix('auth')->group(function() {
     Route::post('login', \App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class);
     Route::post('register', [\App\Http\Controllers\Api\Site\Auth\Spa\LoginController::class, 'register']);

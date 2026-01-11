@@ -58,7 +58,9 @@ class BookingRepository
             $query->where('status', $status);
         }
         
-        return $query->with(['session', 'items'])->get();
+        return $query->with(['session.movie', 'session.cinema', 'session.movie.cache', 'session.room', 'items'])
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**

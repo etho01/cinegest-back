@@ -6,6 +6,8 @@ use App\Repository\BookingRepository;
 use App\Repository\BookingItemRepository;
 use App\Models\User;
 use App\Models\Booking;
+use App\Models\Session;
+use App\Exceptions\Site\InsufficientCapacityException;
 use Illuminate\Support\Facades\DB;
 
 class CreateBookingWithPaymentIntent
@@ -21,6 +23,15 @@ class CreateBookingWithPaymentIntent
             
             // Calculate total tickets
             $totalTickets = self::calculateTotalTickets($data['items']);
+
+            // Get session and verify capacity
+            $session = Session::with('room')->findOrFail($data['sessionId']);;
+
+            $availableSeats = $session->room->capacity - $bookingRepository->getTotalTicketsSold($data['sessionId']);
+            
+            if ($availableSeats < $totalTickets) {
+                throw new InsufficientCapacityException($totalTickets, $availableSeats);
+            }
 
             // Create booking
             $booking = $bookingRepository->create([
