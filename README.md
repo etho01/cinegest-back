@@ -1,618 +1,315 @@
-# Architecture du projet CineGest
+# 🎬 CineGest - Système de Gestion de Cinéma
+
+> Application de gestion de cinéma développée en Laravel, démontrant la maîtrise de deux approches architecturales : Architecture Laravel classique et Clean Architecture (DDD).
+
+[![PHP Version](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
 ## 📋 Table des matières
-- [Introduction](#introduction)
-- [Architecture /app - Laravel Classique](#architecture-app---laravel-classique)
-- [Architecture /site - Clean Architecture](#architecture-site---clean-architecture)
-- [Comparaison des deux approches](#comparaison-des-deux-approches)
-- [Quand utiliser quelle architecture ?](#quand-utiliser-quelle-architecture-)
-- [FAQ : Questions courantes sur l'architecture](#-faq--questions-courantes-sur-larchitecture)
+- [À propos du projet](#à-propos-du-projet)
+- [Fonctionnalités](#fonctionnalités)
+- [Technologies utilisées](#technologies-utilisées)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Compétences démontrées](#compétences-démontrées)
 
 ---
 
-## Introduction
+## 🎯 À propos du projet
 
-Ce projet démontre la maîtrise de deux approches architecturales dans un contexte Laravel :
+**CineGest** est une application backend complète de gestion de cinéma permettant la gestion des films, séances, réservations et paiements. Ce projet démontre ma capacité à concevoir et développer des applications Laravel robustes avec deux approches architecturales distinctes selon les besoins.
 
-1. **Architecture Laravel Classique** (partie `/app`) - Pour prouver la maîtrise des fondamentaux de Laravel
-2. **Clean Architecture** (partie `/site`) - Pour démontrer la capacité à implémenter des architectures complexes et maintenables
+### Objectifs du projet
 
-L'objectif est de montrer la capacité à :
-- ✅ Utiliser Laravel de manière idiomatique et efficace
-- ✅ Comprendre et implémenter des principes architecturaux avancés (SOLID, DDD, Hexagonal Architecture)
-- ✅ Choisir l'architecture appropriée selon le contexte
-- ✅ Maintenir du code testable, découplé et évolutif
+- Gérer les cinémas, salles et séances de manière efficace
+- Système de réservation en ligne avec gestion des stocks
+- Intégration de paiements sécurisés (Stripe)
+- API RESTful pour une future application mobile/frontend
+- Cache intelligent des données de films
+- Intégration avec des APIs externes (TMDB, AlloCiné)
 
 ---
 
-## Architecture /app - Laravel Classique
+## ✨ Fonctionnalités
 
-### 🏗️ Structure
+### 🎪 Gestion Cinéma (Admin)
+- CRUD complet pour les cinémas, salles et séances
+- Système de tarification flexible
+- Gestion des programmations hebdomadaires
+- Calcul automatique des semaines cinéma (jeudi-mercredi)
 
+### 🎫 Réservation (Utilisateur)
+- Consultation des films et séances disponibles
+- Système de réservation avec sélection de places
+- Gestion des réservations (annulation, modification)
+- Confirmation par email
+
+### 💳 Paiements
+- Intégration Stripe pour les paiements sécurisés
+- Webhooks Stripe pour la validation des transactions
+- Gestion des remboursements
+
+### 📊 API Externe
+- Intégration TMDB pour récupérer les informations des films
+- Cache intelligent pour optimiser les performances
+- Synchronisation automatique des données
+
+---
+
+## 🛠 Technologies utilisées
+
+### Backend
+- **PHP 8.2+** - Langage backend
+- **Laravel 11.x** - Framework web PHP
+- **MySQL 8.0** - Base de données relationnelle
+- **Redis** - Cache et sessions
+
+### Architecture & Patterns
+- **Clean Architecture** (DDD, Hexagonal Architecture)
+- **SOLID Principles**
+- **Repository Pattern**
+- **DTO Pattern**
+- **Value Objects**
+
+### Outils & DevOps
+- **Docker & Docker Compose** - Conteneurisation
+- **PHPUnit** - Tests unitaires et d'intégration
+- **Stripe API** - Paiements en ligne
+- **Mailjet** - Service d'emailing
+- **Composer** - Gestionnaire de dépendances
+
+### APIs externes
+- **TMDB API** - Base de données de films
+- **Stripe API** - Traitement des paiements
+
+---
+
+## 🏗 Architecture
+
+Ce projet implémente **deux approches architecturales** pour démontrer ma polyvalence :
+
+### 1️⃣ Architecture Laravel Classique (`/app`)
+
+Approche pragmatique utilisant les conventions Laravel pour un développement rapide.
+
+**Structure :**
 ```
 app/
-├── Http/
-│   ├── Controllers/       # Logique de contrôle et orchestration
-│   ├── Requests/          # Validation des requêtes
-│   └── Resources/         # Transformation des réponses
-├── Models/                # Eloquent Models (Active Record)
-├── UseCase/              # Logique métier (optionnel)
-└── Repository/           # Abstraction de la persistence (optionnel)
+├── Http/Controllers/    # Logique de contrôle
+├── Models/             # Eloquent Models (Active Record)
+├── Repository/         # Abstraction persistence
+└── UseCase/           # Logique métier
 ```
 
-### 📐 Principes
+**Avantages :** Développement rapide, idéal pour MVP et CRUD simples
 
-Cette architecture suit le **pattern MVC de Laravel** avec quelques ajouts pour mieux organiser le code :
+### 2️⃣ Clean Architecture (`/site`)
 
-1. **Controllers** : Orchestrent les requêtes HTTP, délèguent aux Use Cases ou Repositories
-2. **Models (Eloquent)** : Combinent la logique métier et la persistence (Active Record pattern)
-3. **Use Cases** (optionnel) : Encapsulent la logique métier complexe
-4. **Repositories** (optionnel) : Abstraient l'accès aux données pour faciliter les tests
+Approche avancée suivant les principes DDD et Clean Architecture pour une maintenabilité maximale.
 
-### ✅ Avantages
-
-| Avantage | Description |
-|----------|-------------|
-| **Rapidité de développement** | Laravel fournit des outils prêts à l'emploi (Eloquent, Validation, etc.) |
-| **Courbe d'apprentissage douce** | Suit les conventions Laravel, facile à comprendre pour les développeurs Laravel |
-| **Moins de code** | Moins de couches, moins de fichiers à créer et maintenir |
-| **Excellente documentation** | Toutes les ressources Laravel s'appliquent directement |
-| **Idéal pour les petits projets** | Parfait pour les MVPs, prototypes, CRUD simples |
-| **Ecosystem riche** | Accès direct à tous les packages et fonctionnalités Laravel |
-
-### ❌ Inconvénients
-
-| Inconvénient | Description |
-|--------------|-------------|
-| **Couplage au framework** | Dépendance forte à Laravel, migration difficile vers un autre framework |
-| **Testabilité limitée** | Les Models Eloquent sont difficiles à mocker, tests plus lents |
-| **Logique métier dispersée** | Risque de logique dans les Controllers, Models, Services |
-| **Évolutivité complexe** | Difficile à faire évoluer quand la complexité métier augmente |
-| **Active Record** | Le pattern Active Record mélange persistence et logique métier |
-| **Dépendances implicites** | Difficile de voir les dépendances réelles d'une classe |
-
-### 💡 Exemple de code
-
-```php
-// Controller classique Laravel
-class CinemaController extends Controller
-{
-    public function index(CinemaRepository $repository)
-    {
-        $cinemas = $repository->getAll();
-        return CinemaResource::collection($cinemas);
-    }
-    
-    public function store(StoreCinemaRequest $request, CreateCinema $useCase)
-    {
-        $cinema = $useCase->handle($request->validated());
-        return new CinemaResource($cinema);
-    }
-}
-
-// Repository simple
-class CinemaRepository
-{
-    public function getAll()
-    {
-        return Cinema::with('rooms')->get();
-    }
-}
-
-// Use Case simple
-class CreateCinema
-{
-    public function handle(array $data): Cinema
-    {
-        return Cinema::create($data);
-    }
-}
-```
-
----
-
-## Architecture /site - Clean Architecture
-
-### 🏗️ Structure
-
+**Structure :**
 ```
 app/
-├── Domain/                        # Cœur métier (0 dépendance)
+├── Domain/                        # Cœur métier (0 dépendance framework)
 │   ├── Entity/                    # Entités métier pures
-│   │   ├── Movie.php
-│   │   ├── Session.php
-│   │   ├── User.php
-│   │   └── Booking.php
 │   ├── ValueObject/               # Objets valeur immuables
-│   │   ├── Email.php
-│   │   ├── Money.php
-│   │   ├── MovieId.php
-│   │   ├── SessionId.php
-│   │   ├── UserId.php
-│   │   ├── BookingStatus.php
-│   │   └── DateRange.php
-│   └── Repository/                # Interfaces (contrats)
-│       ├── MovieRepositoryInterface.php
-│       ├── SessionRepositoryInterface.php
-│       ├── UserRepositoryInterface.php
-│       ├── BookingRepositoryInterface.php
-│       └── MovieCacheRepositoryInterface.php
+│   └── Repository/                # Interfaces de persistence
 │
 ├── Application/                   # Cas d'utilisation
 │   ├── DTO/                       # Data Transfer Objects
-│   │   ├── MovieCacheDTO.php
-│   │   ├── UserDTO.php
-│   │   └── BookingDTO.php
-│   └── UseCase/
-│       └── Movie/
-│           ├── GetWeeklyMovies.php
-│           └── GetUpcomingMovies.php
+│   └── UseCase/                   # Logique applicative
 │
-├── Infrastructure/                # Implémentations techniques
-│   ├── Persistence/
-│   │   ├── Eloquent/
-│   │   │   └── Repository/
-│   │   │       ├── EloquentMovieRepository.php
-│   │   │       ├── EloquentSessionRepository.php
-│   │   │       ├── EloquentUserRepository.php
-│   │   │       ├── EloquentBookingRepository.php
-│   │   │       └── EloquentMovieCacheRepository.php
-│   │   └── Mapper/
-│   │       ├── MovieMapper.php
-│   │       ├── SessionMapper.php
-│   │       ├── UserMapper.php
-│   │       ├── BookingMapper.php
-│   │       └── MovieCacheMapper.php
-│   └── Providers/
-│       └── DomainServiceProvider.php
-│
-└── Http/
-    └── Controllers/
-        └── Api/Site/
-            ├── MovieController.php
-            └── BookingController.php
+└── Infrastructure/                # Implémentations techniques
+    ├── Persistence/Eloquent/      # Repository Eloquent
+    └── Persistence/Mapper/        # Mappers Domain ↔ Eloquent
 ```
 
-### 📐 Principes (SOLID + DDD)
+**Principes appliqués :**
+- ✅ **Separation of Concerns** - Chaque couche a une responsabilité unique
+- ✅ **Dependency Inversion** - Le Domain ne dépend de rien
+- ✅ **Single Responsibility** - Une classe, une responsabilité
+- ✅ **Open/Closed Principle** - Extensible sans modification
+- ✅ **Interface Segregation** - Interfaces spécifiques et ciblées
 
-Cette architecture implémente les principes de **Clean Architecture**, **Hexagonal Architecture** et **Domain-Driven Design** :
+**Avantages :** Testabilité maximale, code maintenable, indépendance du framework
 
-#### 1. **Domain Layer (Couche Domaine)**
-- **Entités** : Logique métier pure, sans dépendance au framework
-- **Value Objects** : Objets immuables représentant des concepts métier (Email, Money, etc.)
-- **Repository Interfaces** : Contrats définissant comment accéder aux données
-
-#### 2. **Application Layer (Couche Application)**
-- **Use Cases** : Orchestrent les entités pour réaliser des cas d'utilisation
-- **DTOs** : Transportent les données entre les couches
-
-#### 3. **Infrastructure Layer (Couche Infrastructure)**
-- **Repository Implementations** : Implémentent les interfaces avec Eloquent
-- **Mappers** : Convertissent entre Models Eloquent et Entities Domain
-- **Service Providers** : Lient les interfaces aux implémentations (DI)
-
-### ✅ Avantages
-
-| Avantage | Description |
-|----------|-------------|
-| **Indépendance du framework** | Le Domain ne dépend pas de Laravel, facile à migrer |
-| **Testabilité maximale** | Tests unitaires rapides sans base de données ni framework |
-| **Séparation des préoccupations** | Chaque couche a une responsabilité claire et unique |
-| **Maintenabilité** | Code organisé, facile à comprendre et à modifier |
-| **Évolutivité** | Facilite l'ajout de nouvelles fonctionnalités complexes |
-| **Réutilisabilité** | Les entités Domain peuvent être utilisées dans plusieurs contextes |
-| **Principe d'inversion de dépendances** | Les détails dépendent des abstractions, pas l'inverse |
-| **Business Logic centralisée** | Toute la logique métier est dans le Domain, facile à auditer |
-
-### ❌ Inconvénients
-
-| Inconvénient | Description |
-|--------------|-------------|
-| **Complexité initiale** | Beaucoup de fichiers et de couches à créer |
-| **Courbe d'apprentissage élevée** | Nécessite de comprendre SOLID, DDD, Clean Architecture |
-| **Surcharge pour petits projets** | Overkill pour un simple CRUD |
-| **Plus de code à écrire** | Mappers, DTOs, Interfaces... beaucoup de boilerplate |
-| **Temps de développement** | Développement initial plus lent |
-| **Nécessite de l'expérience** | Facile de mal implémenter si on ne maîtrise pas les concepts |
-
-### 💡 Exemple de code
-
-```php
-// ============================================
-// DOMAIN LAYER (Business Logic Pure)
-// ============================================
-
-// Value Object
-final class Email
-{
-    private string $value;
-
-    public function __construct(string $value)
-    {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException("Invalid email format");
-        }
-        $this->value = $value;
-    }
-
-    public function getValue(): string
-    {
-        return $this->value;
-    }
-}
-
-// Entity
-final class User
-{
-    private UserId $id;
-    private Email $email;
-    private string $firstname;
-    private string $lastname;
-
-    public function __construct(
-        UserId $id,
-        Email $email,
-        string $firstname,
-        string $lastname
-    ) {
-        $this->id = $id;
-        $this->email = $email;
-        $this->firstname = $firstname;
-        $this->lastname = $lastname;
-    }
-
-    public function getEmail(): Email
-    {
-        return $this->email;
-    }
-
-    public function getFullName(): string
-    {
-        return $this->firstname . ' ' . $this->lastname;
-    }
-}
-
-// Repository Interface
-interface UserRepositoryInterface
-{
-    public function findByEmail(Email $email): ?User;
-    public function save(User $user): void;
-}
-
-// ============================================
-// APPLICATION LAYER (Use Cases)
-// ============================================
-
-// DTO
-final class UserDTO
-{
-    public function __construct(
-        public readonly int $id,
-        public readonly string $email,
-        public readonly string $firstname,
-        public readonly string $lastname
-    ) {}
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'email' => $this->email,
-            'firstname' => $this->firstname,
-            'lastname' => $this->lastname,
-        ];
-    }
-}
-
-// Use Case
-final class GetUserByEmail
-{
-    public function __construct(
-        private UserRepositoryInterface $userRepository
-    ) {}
-
-    public function execute(string $email): ?UserDTO
-    {
-        $emailVO = new Email($email);
-        $user = $this->userRepository->findByEmail($emailVO);
-
-        if (!$user) {
-            return null;
-        }
-
-        return new UserDTO(
-            $user->getId()->getValue(),
-            $user->getEmail()->getValue(),
-            $user->getFirstname(),
-            $user->getLastname()
-        );
-    }
-}
-
-// ============================================
-// INFRASTRUCTURE LAYER (Implementations)
-// ============================================
-
-// Eloquent Repository Implementation
-final class EloquentUserRepository implements UserRepositoryInterface
-{
-    public function __construct(
-        private UserMapper $mapper
-    ) {}
-
-    public function findByEmail(Email $email): ?User
-    {
-        $model = UserModel::where('email', $email->getValue())->first();
-        
-        if (!$model) {
-            return null;
-        }
-
-        return $this->mapper->toDomain($model);
-    }
-
-    public function save(User $user): void
-    {
-        $model = $this->mapper->toEloquent($user);
-        $model->save();
-    }
-}
-
-// Mapper
-final class UserMapper
-{
-    public function toDomain(UserModel $model): User
-    {
-        return new User(
-            new UserId($model->id),
-            new Email($model->email),
-            $model->firstname,
-            $model->lastname
-        );
-    }
-
-    public function toEloquent(User $user): UserModel
-    {
-        return new UserModel([
-            'id' => $user->getId()->getValue(),
-            'email' => $user->getEmail()->getValue(),
-            'firstname' => $user->getFirstname(),
-            'lastname' => $user->getLastname(),
-        ]);
-    }
-}
-
-// Service Provider (Dependency Injection)
-class DomainServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        $this->app->bind(
-            UserRepositoryInterface::class,
-            EloquentUserRepository::class
-        );
-    }
-}
-
-// ============================================
-// PRESENTATION LAYER (Controller)
-// ============================================
-
-class UserController extends Controller
-{
-    public function __construct(
-        private GetUserByEmail $getUserByEmail
-    ) {}
-
-    public function show(string $email): JsonResponse
-    {
-        $userDTO = $this->getUserByEmail->execute($email);
-
-        if (!$userDTO) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        return response()->json($userDTO->toArray());
-    }
-}
-```
-
----
-
-## Comparaison des deux approches
+### 📊 Comparaison des approches
 
 | Critère | Laravel Classique | Clean Architecture |
 |---------|-------------------|-------------------|
-| **Complexité** | ⭐⭐ Faible | ⭐⭐⭐⭐⭐ Élevée |
-| **Vitesse développement initial** | ⭐⭐⭐⭐⭐ Très rapide | ⭐⭐ Lent |
-| **Maintenabilité long terme** | ⭐⭐⭐ Moyenne | ⭐⭐⭐⭐⭐ Excellente |
-| **Testabilité** | ⭐⭐⭐ Correcte | ⭐⭐⭐⭐⭐ Excellente |
-| **Indépendance framework** | ⭐ Très faible | ⭐⭐⭐⭐⭐ Totale |
-| **Courbe apprentissage** | ⭐⭐ Facile | ⭐⭐⭐⭐⭐ Difficile |
-| **Boilerplate code** | ⭐⭐ Peu | ⭐⭐⭐⭐⭐ Beaucoup |
-| **Performance** | ⭐⭐⭐⭐ Bonne | ⭐⭐⭐ Moyenne* |
-| **Évolutivité** | ⭐⭐⭐ Moyenne | ⭐⭐⭐⭐⭐ Excellente |
-| **Idéal pour équipes** | ⭐⭐⭐ Petites équipes | ⭐⭐⭐⭐⭐ Grandes équipes |
+| **Complexité** | Faible | Élevée |
+| **Développement initial** | Très rapide | Plus lent |
+| **Maintenabilité long terme** | Moyenne | Excellente |
+| **Testabilité** | Correcte | Excellente |
+| **Indépendance framework** | Faible | Totale |
+| **Évolutivité** | Moyenne | Excellente |
 
-\* *La Clean Architecture peut avoir un léger overhead dû aux multiples couches, mais cela reste négligeable dans la plupart des cas.*
+**Choix d'architecture :**
+- **Laravel Classique** → MVP, CRUD simples, petites équipes, time-to-market critique
+- **Clean Architecture** → Projets complexes, long terme, grandes équipes, maintenabilité critique
 
----
-
-## Quand utiliser quelle architecture ?
-
-### 🚀 Utiliser Laravel Classique quand :
-
-- ✅ Vous développez un **MVP** ou un **prototype**
-- ✅ Le projet est **simple** (CRUD basique, peu de logique métier)
-- ✅ L'équipe est **petite** (1-3 développeurs)
-- ✅ Le **time-to-market** est critique
-- ✅ Le projet a une **durée de vie limitée**
-- ✅ Vous voulez maximiser la **productivité** avec les outils Laravel
-
-**Exemples** : Blog, CMS simple, tableau de bord admin, API CRUD simple
-
-### 🏛️ Utiliser Clean Architecture quand :
-
-- ✅ Le projet a une **logique métier complexe**
-- ✅ Le projet est **long terme** et nécessitera de la maintenance
-- ✅ Vous avez une **grande équipe** (5+ développeurs)
-- ✅ La **testabilité** est critique (fintech, healthtech, etc.)
-- ✅ Vous pourriez avoir besoin de **changer de framework** à l'avenir
-- ✅ Le **Domain** pourrait être réutilisé dans d'autres contextes (mobile app, CLI, etc.)
-- ✅ Vous voulez une **architecture évolutive** et maintenable
-
-**Exemples** : Plateforme e-commerce complexe, système de réservation, fintech, SaaS multi-tenant
 
 ---
 
-## 🎯 Conclusion
+## 🚀 Installation
 
-Ce projet démontre la **maîtrise de Laravel** à deux niveaux :
+### Prérequis
 
-1. **Niveau Foundation** : Capacité à utiliser Laravel de manière idiomatique et efficace pour développer rapidement
-2. **Niveau Expert** : Capacité à implémenter des architectures avancées (Clean Architecture, DDD) tout en utilisant Laravel
+- Docker & Docker Compose
+- Git
 
-Le choix entre ces deux architectures dépend du **contexte** :
-- **Laravel Classique** pour la **rapidité** et la **simplicité**
-- **Clean Architecture** pour la **maintenabilité** et l'**évolutivité**
+### Étapes d'installation
 
-Un développeur senior doit savoir **quand utiliser quelle approche** et ne pas systématiquement over-engineer ou under-engineer une solution.
+1. **Cloner le repository**
+```bash
+git clone https://github.com/votre-username/cinegest-back.git
+cd cinegest-back
+```
+
+2. **Configurer les variables d'environnement**
+```bash
+cp .env.example .env
+# Éditer .env avec vos configurations
+```
+
+3. **Démarrer les conteneurs Docker**
+```bash
+docker-compose up -d
+```
+
+4. **Installer les dépendances**
+```bash
+docker-compose exec app composer install
+```
+
+5. **Générer la clé d'application**
+```bash
+docker-compose exec app php artisan key:generate
+```
+
+6. **Exécuter les migrations**
+```bash
+docker-compose exec app php artisan migrate --seed
+```
+
+7. **Accéder à l'application**
+```
+API: http://localhost:8000
+Documentation API: http://localhost:8000/api/documentation
+```
+
+### Tests
+
+```bash
+# Tests unitaires
+docker-compose exec app php artisan test
+
+# Tests avec couverture
+docker-compose exec app php artisan test --coverage
+```
 
 ---
 
-## ❓ FAQ : Questions courantes sur l'architecture
+## 💼 Compétences démontrées
 
-### Pourquoi utiliser l'injection de dépendances de Laravel dans une Clean Architecture ?
+### Architecture & Design Patterns
+- ✅ Clean Architecture (Hexagonal Architecture)
+- ✅ Domain-Driven Design (DDD)
+- ✅ SOLID Principles
+- ✅ Repository Pattern
+- ✅ DTO Pattern
+- ✅ Value Objects
+- ✅ Dependency Injection
+- ✅ Service Provider Pattern
 
-Cette question est **excellente** car elle touche au cœur de la Clean Architecture et révèle un paradoxe apparent.
+### Laravel
+- ✅ Eloquent ORM (relations, scopes, mutators)
+- ✅ API Resources & Collections
+- ✅ Form Requests (validation)
+- ✅ Service Container & Dependency Injection
+- ✅ Middleware
+- ✅ Events & Listeners
+- ✅ Queue & Jobs
+- ✅ Notifications & Mailing
+- ✅ API Authentication (Sanctum)
+- ✅ Database Migrations & Seeders
 
-#### 🎯 La Clean Architecture ≠ Zéro Framework
+### Base de données
+- ✅ Modélisation relationnelle complexe
+- ✅ Optimisation des requêtes (eager loading, indexes)
+- ✅ Transactions
+- ✅ Relations many-to-many avec pivot
+- ✅ Soft deletes
 
-La Clean Architecture ne dit **pas** "n'utilisez jamais le framework". Elle dit :
+### API & Intégrations
+- ✅ RESTful API design
+- ✅ Webhooks (Stripe)
+- ✅ Intégration APIs tierces (TMDB, Stripe, Mailjet)
+- ✅ Authentification & autorisations
+- ✅ Rate limiting
 
-> **"Le Domain ne doit pas dépendre du framework"**
+### DevOps & Outils
+- ✅ Docker & Docker Compose
+- ✅ Git & GitHub
+- ✅ Tests automatisés (PHPUnit)
+- ✅ Configuration multi-environnement
+- ✅ Logging & monitoring
 
-#### 📊 Séparation des responsabilités par couche
-
-**Domain Layer** (100% portable)
-- **Zéro dépendance** à Laravel
-- Uniquement PHP pur
-- Peut être copié dans n'importe quel projet PHP
-
-```php
-// Domain/Entity/User.php - Aucune trace de Laravel
-final class User
-{
-    public function __construct(
-        private UserId $id,
-        private Email $email
-    ) {}
-}
-```
-
-**Application Layer** (95% portable)
-- Use Cases en PHP pur
-- Dépend uniquement des **interfaces** du Domain
-- Peut tourner avec n'importe quelle implémentation
-
-```php
-// Application/UseCase/GetWeeklyMovies.php
-final class GetWeeklyMovies
-{
-    public function __construct(
-        private MovieCacheRepositoryInterface $repo // Interface, pas Eloquent
-    ) {}
-}
-```
-
-**Infrastructure Layer** (Spécifique au framework)
-- **C'est ici qu'on DOIT utiliser le framework**
-- Cette couche est **"jetable"** et remplaçable
-- `DomainServiceProvider` fait partie de cette couche
-
-```php
-// Infrastructure/Providers/DomainServiceProvider.php
-// ↑ C'est dans Infrastructure, donc OK d'utiliser Laravel
-class DomainServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        $this->app->bind(
-            SessionRepositoryInterface::class,
-            EloquentSessionRepository::class
-        );
-    }
-}
-```
-
-#### 🔄 Que se passe-t-il si vous changez de framework ?
-
-**Scénario : Migration de Laravel vers Symfony**
-
-**Ce qui ne change PAS** :
-- ✅ Tout le Domain (Entities, Value Objects, Interfaces)
-- ✅ Tous les Use Cases
-- ✅ Toute la logique métier
-
-**Ce qui change** :
-- ❌ `DomainServiceProvider` → Créer un `services.yaml` Symfony
-- ❌ `EloquentMovieRepository` → Créer un `DoctrineMovieRepository`
-- ❌ Controllers → Adapter au routing Symfony
-
-**Temps estimé** : Quelques jours vs des mois de réécriture totale
-
-#### 🏗️ L'Infrastructure est un "Plugin"
-
-Pensez à l'Infrastructure comme un **adaptateur** :
-
-```
-[Domain]  ← Ne connaît rien du framework
-    ↑
-    | (interface)
-    |
-[Application] ← Ne connaît rien du framework
-    ↑
-    | (interface)
-    |
-[Infrastructure] ← UTILISE le framework (Laravel, Symfony, etc.)
-    ↑
-    |
-[Framework] (Laravel, Symfony, etc.)
-```
-
-Le Service Provider est le **point de branchement** entre votre logique métier portable et le framework spécifique.
-
-#### 🤔 Pourquoi utiliser Laravel DI alors ?
-
-**Avantages pragmatiques** :
-1. **Déjà présent** : Pas besoin d'ajouter une dépendance
-2. **Performant** : Container Laravel est optimisé
-3. **Intégré** : Fonctionne avec tout l'écosystème (Middleware, Events, etc.)
-4. **Auto-wiring** : Résout automatiquement les dépendances
-5. **Conventions** : Les développeurs Laravel connaissent déjà
-
-**Le compromis réaliste** :
-- **99% des projets** ne changeront JAMAIS de framework
-- **Si changement**, refaire l'Infrastructure prend quelques jours vs mois
-- **Optimiser pour la productivité actuelle** > optimiser pour un scénario hypothétique
-
-#### 📌 Réponse finale
-
-Utiliser l'injection de dépendances de Laravel dans `DomainServiceProvider` est **totalement conforme** à la Clean Architecture car :
-
-1. ✅ Le **Domain reste portable** (zéro dépendance)
-2. ✅ L'**Application reste portable** (dépend uniquement d'interfaces)
-3. ✅ L'**Infrastructure est censée utiliser le framework** (c'est son rôle)
-4. ✅ Si migration nécessaire, seule l'Infrastructure change (économie de 80-90% du code)
-
-**La portabilité est un gradient, pas du tout-ou-rien.** Clean Architecture vous donne la flexibilité de changer de framework avec un effort raisonnable, pas de réinventer la roue à chaque projet.
+### Bonnes pratiques
+- ✅ Code testable et découplé
+- ✅ Gestion des erreurs et exceptions custom
+- ✅ Validation des données
+- ✅ Cache stratégique
+- ✅ Documentation claire
+- ✅ Principe de responsabilité unique
+- ✅ Code review friendly
 
 ---
 
-## 📚 Ressources
+## 📚 Structure du projet
 
-- [Laravel Documentation](https://laravel.com/docs)
-- [Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Domain-Driven Design (Eric Evans)](https://www.domainlanguage.com/ddd/)
-- [Hexagonal Architecture (Alistair Cockburn)](https://alistair.cockburn.us/hexagonal-architecture/)
-- [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
+```
+cinegest-back/
+├── app/
+│   ├── Application/         # Use Cases & DTOs (Clean Architecture)
+│   ├── Domain/             # Entities, Value Objects, Interfaces (Clean Architecture)
+│   ├── Infrastructure/     # Implémentations techniques (Clean Architecture)
+│   ├── Http/               # Controllers, Middleware, Requests, Resources
+│   ├── Models/             # Eloquent Models
+│   ├── Repository/         # Repositories (Laravel classique)
+│   ├── UseCase/           # Use Cases (Laravel classique)
+│   └── Exceptions/        # Exceptions custom
+├── config/                 # Configuration Laravel
+├── database/
+│   ├── migrations/        # Migrations de base de données
+│   └── seeders/           # Seeders
+├── routes/                # Définition des routes API
+├── tests/                 # Tests unitaires et d'intégration
+│   ├── Unit/
+│   └── Feature/
+├── docker-compose.yml     # Configuration Docker
+└── README.md
+
+```
+
+---
+
+## 🎓 Réflexions architecturales
+
+### Pourquoi deux architectures ?
+
+Ce projet démontre ma compréhension que **l'architecture doit servir le besoin**, pas l'inverse :
+
+- **Laravel Classique** : Utilisée pour les fonctionnalités CRUD standards où la rapidité de développement est prioritaire
+- **Clean Architecture** : Utilisée pour la partie réservation/paiement où la logique métier est complexe et nécessite une maintenabilité maximale
+
+### Leçons apprises
+
+1. **Clean Architecture n'est pas toujours la réponse** - Sur-architecturer un simple CRUD peut ralentir le développement sans bénéfice réel
+2. **Les tests guident l'architecture** - Une architecture testable révèle naturellement les dépendances problématiques
+3. **Le Domain doit rester pur** - Aucune dépendance au framework dans la couche Domain garantit la portabilité
+4. **Les Value Objects évitent les bugs** - Encapsuler les validations dans des Value Objects (Email, Money) élimine une catégorie entière de bugs
+5. **Les interfaces permettent la flexibilité** - Changer d'Eloquent à Doctrine nécessiterait uniquement de réécrire l'Infrastructure
+
+---
