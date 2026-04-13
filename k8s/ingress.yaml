@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cinegest-back
+  namespace: cinegest
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - api.cinegest.nicolasbarbey.fr
+      secretName: api-cinegest-tls
+  rules:
+    - host: api.cinegest.nicolasbarbey.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cinegest-back
+                port:
+                  number: 80

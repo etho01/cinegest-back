@@ -1,48 +1,36 @@
 FROM php:8.4-apache
- 
-ARG WWW_USER=1000
- 
-# Set working directory
-WORKDIR /app
- 
-# Install system dependencies
+
+WORKDIR /var/www/html
+
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
+    unzip \
+    zip \
+    libzip-dev \
     libonig-dev \
     libxml2-dev \
     libpq-dev \
-    libzip-dev \
+    libicu-dev \
     libcurl4-openssl-dev \
-    zip \
-    unzip \
-    default-mysql-client
- 
-# Install PHP extensions
-RUN docker-php-ext-configure pcntl --enable-pcntl
-RUN docker-php-ext-install pdo pdo_mysql zip calendar mbstring pcntl curl bcmath
- 
-# Copy vhost config
-COPY vhost.conf /etc/apache2/sites-available/000-default.conf
- 
-# Enable Apache mods
-RUN a2enmod rewrite
- 
-# Get latest Composer
-RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
- 
-# Create user
-RUN groupadd --force -g $WWW_USER webapp
-RUN useradd -ms /bin/bash --no-user-group -g $WWW_USER -u $WWW_USER webapp
-
-COPY . .
- 
-# Clean cache
-RUN apt-get -y autoremove \
+    default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip bcmath intl \
+    && a2enmod rewrite \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
- 
-USER ${WWW_USER}
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY . .
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+    && php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]
