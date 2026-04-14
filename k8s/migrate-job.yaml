@@ -5,13 +5,26 @@ metadata:
   namespace: cinegest
 spec:
   ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
   template:
     spec:
       restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 33
+        fsGroup: 33
       containers:
         - name: migrate
           image: ghcr.io/etho01/cinegest-back:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 33
+            capabilities:
+              drop:
+                - ALL
           envFrom:
             - secretRef:
                 name: cinegest-back-secret

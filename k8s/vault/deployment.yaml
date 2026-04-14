@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+        - name: vault
+          image: hashicorp/vault:1.16
+          ports:
+            - containerPort: 8200
+          env:
+            - name: VAULT_LOCAL_CONFIG
+              value: |
+                ui = true
+                listener "tcp" {
+                  address = "0.0.0.0:8200"
+                  tls_disable = 1
+                }
+                storage "file" {
+                  path = "/vault/data"
+                }
+                disable_mlock = true
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+          volumeMounts:
+            - name: vault-data
+              mountPath: /vault/data
+      volumes:
+        - name: vault-data
+          persistentVolumeClaim:
+            claimName: vault-data

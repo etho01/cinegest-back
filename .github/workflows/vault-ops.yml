@@ -1,0 +1,91 @@
+name: Vault Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Operation to perform'
+        required: true
+        type: choice
+        options:
+          - check-status
+          - unseal
+          - sync-secrets
+          - view-externalsecret
+
+env:
+  NAMESPACE: cinegest
+
+jobs:
+  vault-ops:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Write kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Check Vault Status
+        if: github.event.inputs.operation == 'check-status'
+        run: |
+          echo "🔍 Checking Vault status..."
+          kubectl -n vault exec deploy/vault -- vault status || true
+          
+          echo ""
+          echo "📊 External Secrets status:"
+          kubectl -n ${NAMESPACE} get externalsecret cinegest-back-vault || true
+          
+          echo ""
+          echo "🔐 Secret status:"
+          kubectl -n ${NAMESPACE} get secret cinegest-back-secret || true
+
+      - name: Unseal Vault
+        if: github.event.inputs.operation == 'unseal'
+        run: |
+          echo "⚠️ This operation requires manual intervention"
+          echo "To unseal Vault, run:"
+          echo ""
+          echo "  kubectl -n vault exec -it deploy/vault -- sh"
+          echo "  export VAULT_ADDR=http://localhost:8200"
+          echo "  vault operator unseal <UNSEAL_KEY>"
+          echo ""
+          echo "Current Vault status:"
+          kubectl -n vault exec deploy/vault -- vault status || true
+
+      - name: Force Secrets Sync
+        if: github.event.inputs.operation == 'sync-secrets'
+        run: |
+          echo "🔄 Forcing secrets synchronization..."
+          kubectl -n ${NAMESPACE} annotate externalsecret cinegest-back-vault \
+            force-sync=$(date +%s) --overwrite
+          
+          echo "⏳ Waiting for synchronization..."
+          sleep 5
+          
+          kubectl -n ${NAMESPACE} describe externalsecret cinegest-back-vault
+          
+          echo ""
+          echo "✅ Synchronization triggered. Check status with:"
+          echo "  kubectl -n ${NAMESPACE} get externalsecret cinegest-back-vault"
+
+      - name: View ExternalSecret Details
+        if: github.event.inputs.operation == 'view-externalsecret'
+        run: |
+          echo "📋 ExternalSecret details:"
+          kubectl -n ${NAMESPACE} describe externalsecret cinegest-back-vault
+          
+          echo ""
+          echo "📊 SecretStore details:"
+          kubectl -n ${NAMESPACE} describe secretstore vault-backend
+          
+          echo ""
+          echo "📦 External Secrets Operator logs (last 50 lines):"
+          kubectl -n external-secrets logs --tail=50 -l app.kubernetes.io/name=external-secrets

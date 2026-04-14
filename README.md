@@ -6,7 +6,24 @@
 [![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
-## 📋 Table des matières
+## � Guides de démarrage rapide
+
+| Guide | Description | Durée |
+|-------|-------------|-------|
+| **[⚡ QUICKSTART.md](QUICKSTART.md)** | Configuration infrastructure en commandes essentielles | 5 min |
+| **[📝 SETUP.md](SETUP.md)** | Guide complet étape par étape avec toutes les commandes | 20 min |
+| **[🤖 setup-infrastructure.sh](setup-infrastructure.sh)** | Script automatique de configuration complète | 10 min |
+
+**Pour déployer en production Kubernetes:**
+```bash
+./setup-infrastructure.sh  # Configuration automatique
+# OU
+# Suivre QUICKSTART.md pour version manuelle
+```
+
+---
+
+## �📋 Table des matières
 - [À propos du projet](#à-propos-du-projet)
 - [Fonctionnalités](#fonctionnalités)
 - [Technologies utilisées](#technologies-utilisées)
@@ -211,6 +228,82 @@ docker-compose exec app php artisan test --coverage
 
 ---
 
+## ☸️ Déploiement Kubernetes
+
+Ce projet est configuré pour un déploiement en production sur Kubernetes (K3s) avec intégration complète Vault et CI/CD GitHub Actions.
+
+### 🏗️ Infrastructure
+
+- **Kubernetes (K3s)** - Orchestration de conteneurs
+- **HashiCorp Vault** - Gestion sécurisée des secrets
+- **External Secrets Operator** - Synchronisation Vault → K8s
+- **Traefik** - Ingress controller avec TLS
+- **Cert-Manager** - Certificats SSL automatiques (Let's Encrypt)
+- **GitHub Actions** - CI/CD automatisé
+
+### 🔒 Sécurité
+
+- ✅ Secrets stockés dans Vault (jamais dans Git)
+- ✅ SecurityContext avec utilisateur non-root
+- ✅ Capabilities drop (principe least privilege)
+- ✅ Rate-limiting sur l'API
+- ✅ Security headers HTTP
+- ✅ TLS/SSL automatique
+- ✅ Network policies
+- ✅ ReadOnlyRootFilesystem
+
+### 🚀 Pipeline CI/CD
+
+```
+Push sur main → Tests → Build Docker → Deploy K8s → Migrations → Health checks
+                 ↓                                                    ↓
+              PHPUnit                                         Rollback auto si échec
+```
+
+**Caractéristiques** :
+- Tests automatiques avant chaque déploiement
+- Build multi-stage Docker optimisé
+- Déploiement zero-downtime (RollingUpdate)
+- Migrations automatiques avec rollback
+- Synchronisation secrets depuis Vault
+- Monitoring et health checks
+
+### 📚 Documentation déploiement
+
+| Document | Description |
+|----------|-------------|
+| [Workflows GitHub Actions](.github/README.md) | Guide complet des workflows CI/CD |
+| [Pipeline + Vault](.github/PIPELINE-VAULT.md) | Configuration pipeline avec Vault |
+| [Guide rapide Vault](k8s/VAULT-QUICKSTART.md) | Installation et configuration Vault |
+| [Vault complet](k8s/vault/README.md) | Documentation détaillée Vault |
+| [Manifests Kubernetes](k8s/) | Configuration K8s (deployment, service, ingress) |
+
+### ⚡ Déploiement rapide
+
+```bash
+# 1. Installer Vault et ESO
+./k8s/vault/install.sh
+
+# 2. Configurer Vault (une seule fois)
+./k8s/vault/configure-vault.sh <ROOT_TOKEN>
+
+# 3. Push code → Pipeline automatique
+git push origin main
+```
+
+### 🎯 Fonctionnalités production
+
+- **Zero-downtime deployments** - RollingUpdate avec maxUnavailable: 0
+- **Auto-scaling** - HPA (Horizontal Pod Autoscaler) configuré
+- **Health monitoring** - Liveness & Readiness probes
+- **Rollback automatique** - En cas d'échec de déploiement
+- **Secrets rotation** - Via Vault avec sync automatique
+- **SSL/TLS** - Certificats Let's Encrypt automatiques
+- **Rate limiting** - Protection contre les abus API
+- **Logging centralisé** - Logs pods agrégés
+
+---
+
 ## 💼 Compétences démontrées
 
 ### Architecture & Design Patterns
@@ -248,6 +341,20 @@ docker-compose exec app php artisan test --coverage
 - ✅ Intégration APIs tierces (TMDB, Stripe, Mailjet)
 - ✅ Authentification & autorisations
 - ✅ Rate limiting
+
+### DevOps & Infrastructure
+- ✅ **Kubernetes (K3s)** - Orchestration conteneurs
+- ✅ **Docker** - Conteneurisation multi-stage
+- ✅ **GitHub Actions** - CI/CD automatisé
+- ✅ **HashiCorp Vault** - Secret management
+- ✅ **External Secrets Operator** - Sync secrets Vault↔K8s
+- ✅ **Traefik** - Ingress controller + middleware
+- ✅ **Cert-Manager** - SSL/TLS automatique
+- ✅ **Helm** - Package manager Kubernetes
+- ✅ Zero-downtime deployments
+- ✅ Auto-rollback on failure
+- ✅ Health checks & monitoring
+- ✅ Infrastructure as Code
 
 ### DevOps & Outils
 - ✅ Docker & Docker Compose

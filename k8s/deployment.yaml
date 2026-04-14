@@ -6,6 +6,11 @@ metadata:
 spec:
   replicas: 2
   revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: cinegest-back
@@ -14,10 +19,21 @@ spec:
       labels:
         app: cinegest-back
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 33
+        fsGroup: 33
       containers:
         - name: app
           image: ghcr.io/etho01/cinegest-back:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 33
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 80
           envFrom:
