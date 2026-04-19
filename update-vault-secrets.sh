@@ -43,11 +43,15 @@ kubectl -n vault port-forward svc/vault 8200:8200 > /dev/null 2>&1 &
 PF_PID=$!
 sleep 3
 
+# Créer un fichier temporaire sécurisé
+TEMP_FILE=$(mktemp)
+
 # Trap pour arrêter le port-forward à la fin
 cleanup() {
     echo ""
     echo -e "${CYAN}🧹 Nettoyage...${NC}"
     kill $PF_PID 2>/dev/null || true
+    rm -f "$TEMP_FILE" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -66,15 +70,15 @@ echo ""
 
 # Récupérer les secrets actuels
 echo -e "${CYAN}📥 Récupération des secrets actuels...${NC}"
-if ! vault kv get -format=json secret/cinegest/app > /tmp/current_secrets.json 2>/dev/null; then
+if ! vault kv get -format=json secret/cinegest/app > "$TEMP_FILE" 2>/dev/null; then
     echo -e "${YELLOW}⚠️  Aucun secret existant, création d'une nouvelle configuration${NC}"
-    echo '{"data":{"data":{}}}' > /tmp/current_secrets.json
+    echo '{"data":{"data":{}}}' > "$TEMP_FILE"
 fi
 
 # Fonction pour récupérer une valeur actuelle
 get_current_value() {
     local key=$1
-    jq -r ".data.data.${key} // \"\"" /tmp/current_secrets.json
+    jq -r ".data.data.${key} // \"\"" "$TEMP_FILE"
 }
 
 # Fonction pour demander une valeur
