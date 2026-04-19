@@ -61,7 +61,8 @@ sleep 2
 
 # Récupérer le token JWT
 SA_JWT_TOKEN=$($KUBECTL -n cinegest create token vault-auth --duration=8760h)
-K8S_HOST=$($KUBECTL config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.server}')
+# Utiliser l'endpoint interne Kubernetes (Vault tourne dans le cluster)
+K8S_HOST="https://kubernetes.default.svc:443"
 K8S_CA_CERT=$($KUBECTL config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 -d)
 
 # Write CA cert to Vault pod's tmp
@@ -120,6 +121,7 @@ echo "Vérifier les secrets :"
 echo "  $KUBECTL -n vault exec deploy/vault -- sh -c 'export VAULT_ADDR=http://localhost:8200 VAULT_TOKEN=$ROOT_TOKEN && vault kv get secret/cinegest/app'"
 echo ""
 echo "Déployer External Secrets :"
+echo "  $KUBECTL apply -f k8s/vault/rbac.yaml"
 echo "  $KUBECTL apply -f k8s/vault/serviceaccount.yaml"
 echo "  $KUBECTL apply -f k8s/secretstore.yaml"
 echo "  $KUBECTL apply -f k8s/externalsecret.yaml"
