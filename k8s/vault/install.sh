@@ -1,13 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
+# Configurer KUBECONFIG pour accéder au cluster K3s
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+# Utiliser sudo pour kubectl et exporter KUBECONFIG
+KUBECTL="sudo -E kubectl"
+HELM="sudo -E helm"
+
 echo "📦 Installation de External Secrets Operator..."
 
 # Installer ESO avec Helm
-helm repo add external-secrets https://charts.external-secrets.io
-helm repo update
+$HELM repo add external-secrets https://charts.external-secrets.io || echo "Repo already exists"
+$HELM repo update
 
-helm upgrade --install external-secrets \
+$HELM upgrade --install external-secrets \
   external-secrets/external-secrets \
   --namespace external-secrets \
   --create-namespace \
@@ -20,21 +27,21 @@ echo ""
 echo "📦 Déploiement de Vault..."
 
 # Créer les namespaces
-kubectl apply -f k8s/vault/namespace.yaml
+$KUBECTL apply -f k8s/vault/namespace.yaml
 
 # Déployer Vault
-kubectl apply -f k8s/vault/pvc.yaml
-kubectl apply -f k8s/vault/deployment.yaml
-kubectl apply -f k8s/vault/service.yaml
+$KUBECTL apply -f k8s/vault/pvc.yaml
+$KUBECTL apply -f k8s/vault/deployment.yaml
+$KUBECTL apply -f k8s/vault/service.yaml
 
 echo "⏳ Attente du démarrage de Vault..."
-kubectl -n vault wait --for=condition=ready pod -l app=vault --timeout=300s
+$KUBECTL -n vault wait --for=condition=ready pod -l app=vault --timeout=300s
 
 echo ""
 echo "🔧 Initialisation de Vault..."
 echo "Exécuter manuellement :"
 echo ""
-echo "  kubectl -n vault exec -it deploy/vault -- sh"
+echo "  $KUBECTL -n vault exec -it deploy/vault -- sh"
 echo ""
 echo "Puis dans le pod :"
 echo "  export VAULT_ADDR=http://localhost:8200"
