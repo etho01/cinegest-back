@@ -41,14 +41,14 @@ spec:
                 name: cinegest-back-secret
           readinessProbe:
             httpGet:
-              path: /health
+              path: /up
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /up
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 20
