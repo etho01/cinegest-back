@@ -86,7 +86,7 @@ return [
     |
     */
 
-    'table' => env('SESSION_TABLE', 'sessions_users'),
+    'table' => env('SESSION_TABLE', 'sessions_users_system'),
 
     /*
     |--------------------------------------------------------------------------
