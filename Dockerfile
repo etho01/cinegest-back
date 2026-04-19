@@ -1,6 +1,23 @@
 # Stage 1: Composer dependencies
-FROM composer:2 AS composer
+FROM php:8.4-cli AS composer
 WORKDIR /app
+
+# Install system dependencies and PHP extensions needed by Laravel
+RUN apt-get update && apt-get install -y \
+    git \
+    zip \
+    unzip \
+    libzip-dev \
+    libonig-dev \
+    libicu-dev \
+    && docker-php-ext-install zip mbstring bcmath intl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install dependencies
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
