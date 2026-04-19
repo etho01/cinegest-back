@@ -299,6 +299,7 @@ echo "🚀 Déploiement des manifestes Kubernetes..."
 kubectl apply -f k8s/namespace.yaml
 
 # Déployer les manifestes Vault
+kubectl apply -f k8s/vault/rbac.yaml
 kubectl apply -f k8s/vault/serviceaccount.yaml
 kubectl apply -f k8s/secretstore.yaml
 kubectl apply -f k8s/externalsecret.yaml

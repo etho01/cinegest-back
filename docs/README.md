@@ -15,8 +15,15 @@ Bienvenue dans la documentation complète du projet CineGest Backend.
 
 ### Configuration Vault
 - [Guide rapide Vault](../k8s/VAULT-QUICKSTART.md) - Installation et configuration Vault
-- [Documentation complète Vault](../k8s/vault/README.md) - Guide détaillé avec troubleshooting
-- [Configuration pipeline](../.github/PIPELINE-VAULT.md) - Intégration Vault dans CI/CD
+- [Documentation complète Vault](VAULT-SETUP.md) - Guide détaillé avec troubleshooting
+- **[Dépannage Vault](VAULT-TROUBLESHOOTING.md) 🔧** - Résolution des problèmes courants
+- **[Guide des Scripts](SCRIPTS-GUIDE.md) 📜** - Documentation complète des scripts d'installation
+
+### Sécurité
+- **[Guide de Sécurité](SECURITY.md) 🔐** - Bonnes pratiques et procédures d'urgence
+- Gestion des secrets - Vault, rotation, classification
+- Configuration Kubernetes - Security context, network policies
+- Monitoring et alertes - Health checks, logs, métriques
 
 ### CI/CD
 - [Workflows GitHub Actions](../.github/README.md) - Guide des workflows disponibles
@@ -31,6 +38,12 @@ Tous les fichiers dans [`k8s/`](../k8s/):
 - `ingress.yaml` - Configuration Traefik avec TLS
 - `middleware.yaml` - Rate limiting et security headers
 - `migrate-job.yaml` - Job de migration DB
+
+Scripts racine:
+- `setup-infrastructure.sh` - Installation complète (tout-en-un)
+- `update-vault-secrets.sh` - Mise à jour interactive des secrets
+
+📖 **Documentation complète:** [Guide des Scripts](SCRIPTS-GUIDE.md)
 - `secretstore.yaml` - Connexion à Vault
 - `externalsecret.yaml` - Synchronisation secrets Vault → K8s
 
