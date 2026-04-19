@@ -88,29 +88,33 @@ jobs:
               --set installCRDs=true \
               --wait \
               --timeout 5m
-            
-            # Attendre que les CRDs soient disponibles
-            echo "Waiting for CRDs to be ready..."
-            for i in {1..30}; do
-              if kubectl get crd secretstores.external-secrets.io &>/dev/null; then
-                echo "✅ External Secrets Operator CRDs ready"
-                break
-              fi
-              if [ $i -eq 30 ]; then
-                echo "❌ Timeout waiting for ESO CRDs"
-                exit 1
-              fi
-              sleep 2
-            done
-            
-            # Attendre que l'opérateur soit prêt
-            kubectl wait --for=condition=available --timeout=300s \
-              deployment/external-secrets -n external-secrets || true
-            
             echo "✅ External Secrets Operator installed"
           else
-            echo "✅ External Secrets Operator already installed"
+            echo "✅ External Secrets Operator already present"
           fi
+          
+          # Vérification finale : attendre que les CRDs soient disponibles (peu importe si déjà installé ou juste installé)
+          echo "Verifying CRDs availability..."
+          for i in {1..30}; do
+            if kubectl get crd secretstores.external-secrets.io externalsecrets.external-secrets.io &>/dev/null; then
+              echo "✅ External Secrets CRDs are ready"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Timeout waiting for ESO CRDs"
+              kubectl get crd | grep external-secrets || echo "No ESO CRDs found"
+              exit 1
+            fi
+            echo "Waiting for CRDs... ($i/30)"
+            sleep 2
+          done
+          
+          # Attendre que l'opérateur soit prêt
+          echo "Waiting for External Secrets operator deployment..."
+          kubectl wait --for=condition=available --timeout=300s \
+            deployment/external-secrets -n external-secrets 2>/dev/null || \
+            kubectl wait --for=condition=available --timeout=300s \
+              deployment/external-secrets-webhook -n external-secrets 2>/dev/null || true
 
       - name: Deploy Vault integration
         run: |
