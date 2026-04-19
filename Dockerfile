@@ -1,36 +1,35 @@
-FROM php:8.4-apache
+# Stage 1: Composer dependencies
+FROM composer:2 AS composer
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
+# Stage 2: Runtime
+FROM php:8.4-apache
 WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    zip \
     libzip-dev \
     libonig-dev \
-    libxml2-dev \
-    libpq-dev \
     libicu-dev \
-    libcurl4-openssl-dev \
     default-mysql-client \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip bcmath intl \
+    && docker-php-ext-install pdo_mysql mbstring zip bcmath intl \
     && a2enmod rewrite \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY --from=composer /app/vendor ./vendor
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && php artisan config:clear \
+RUN php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear \
-    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+USER www-data
 EXPOSE 80
 
 CMD ["apache2-foreground"]

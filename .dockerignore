@@ -1,13 +1,45 @@
+# Git
 .git
+.gitignore
+.gitattributes
 .github
+
+# Dependencies
 node_modules
 vendor
+
+# Storage (generated at runtime)
 storage/logs
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
+
+# Environment
 .env
 .env.*
+
+# Docker & K8s
 docker-compose.yml
+Dockerfile
+k8s/
+
+# Scripts
+setup-infrastructure.sh
+update-vault-secrets.sh
+
+# Documentation & Tests
 README.md
+docs/
 tests
+phpunit.xml
+.phpunit.result.cache
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
