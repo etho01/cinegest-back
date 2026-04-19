@@ -20,7 +20,7 @@ Puis suivre les instructions à l'écran.
 ### 2. Initialiser Vault
 ```bash
 kubectl -n vault exec -it deploy/vault -- sh
-export VAULT_ADDR=http://localhost:8200
+export VAULT_ADDR=http://127.0.0.1:8200
 vault operator init -key-shares=1 -key-threshold=1
 # ⚠️ SAUVEGARDER: Unseal Key + Root Token
 vault operator unseal <UNSEAL_KEY>

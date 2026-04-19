@@ -15,7 +15,7 @@ kubectl -n vault port-forward svc/vault 8200:8200 &
 PF_PID=$!
 sleep 3
 
-export VAULT_ADDR=http://localhost:8200
+export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_TOKEN="$ROOT_TOKEN"
 
 # Activer KV v2

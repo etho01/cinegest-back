@@ -1,3 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+  namespace: vault
+data:
+  vault.hcl: |
+    ui = true
+    api_addr = "http://127.0.0.1:8200"
+    
+    listener "tcp" {
+      address = "0.0.0.0:8200"
+      tls_disable = 1
+    }
+    
+    storage "file" {
+      path = "/vault/data"
+    }
+    
+    disable_mlock = true
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,23 +34,31 @@ spec:
       labels:
         app: vault
     spec:
+      shareProcessNamespace: true
       containers:
         - name: vault
           image: hashicorp/vault:1.16
+          command: ["vault", "server", "-config=/vault/config/vault.hcl"]
           ports:
             - containerPort: 8200
-          env:
-            - name: VAULT_LOCAL_CONFIG
-              value: |
-                ui = true
-                listener "tcp" {
-                  address = "0.0.0.0:8200"
-                  tls_disable = 1
-                }
-                storage "file" {
-                  path = "/vault/data"
-                }
-                disable_mlock = true
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "killall -TERM vault; sleep 5"]
           securityContext:
             capabilities:
               add:
@@ -37,7 +66,12 @@ spec:
           volumeMounts:
             - name: vault-data
               mountPath: /vault/data
+            - name: vault-config
+              mountPath: /vault/config
       volumes:
         - name: vault-data
           persistentVolumeClaim:
             claimName: vault-data
+        - name: vault-config
+          configMap:
+            name: vault-config

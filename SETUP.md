@@ -53,7 +53,7 @@ kubectl -n vault wait --for=condition=ready pod -l app=vault --timeout=120s
 kubectl -n vault exec -it deploy/vault -- sh
 
 # Dans le pod Vault
-export VAULT_ADDR=http://localhost:8200
+export VAULT_ADDR=http://127.0.0.1:8200
 
 # Initialiser Vault (SAUVEGARDER LA SORTIE !)
 vault operator init -key-shares=1 -key-threshold=1
@@ -314,7 +314,7 @@ php artisan tinker
 ### Vault sealed après redémarrage
 ```bash
 kubectl -n vault exec -it deploy/vault -- sh
-export VAULT_ADDR=http://localhost:8200
+export VAULT_ADDR=http://127.0.0.1:8200
 vault operator unseal <UNSEAL_KEY>
 exit
 ```

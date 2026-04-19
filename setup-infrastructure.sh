@@ -80,7 +80,7 @@ kubectl -n vault wait --for=condition=ready pod -l app=vault --timeout=120s
 # Initialiser Vault
 echo ""
 echo "🔐 Initialisation de Vault..."
-VAULT_INIT=$(kubectl -n vault exec deploy/vault -- vault operator init -format=json -key-shares=1 -key-threshold=1)
+VAULT_INIT=$(kubectl -n vault exec deploy/vault -- sh -c "VAULT_ADDR=http://127.0.0.1:8200 vault operator init -format=json -key-shares=1 -key-threshold=1")
 
 UNSEAL_KEY=$(echo "$VAULT_INIT" | jq -r '.unseal_keys_b64[0]')
 ROOT_TOKEN=$(echo "$VAULT_INIT" | jq -r '.root_token')
@@ -112,10 +112,10 @@ fi
 # Unseal Vault
 echo ""
 echo "🔓 Unseal de Vault..."
-kubectl -n vault exec deploy/vault -- vault operator unseal "$UNSEAL_KEY" > /dev/null
+kubectl -n vault exec deploy/vault -- sh -c "VAULT_ADDR=http://127.0.0.1:8200 vault operator unseal $UNSEAL_KEY" > /dev/null
 
 # Vérifier le statut
-kubectl -n vault exec deploy/vault -- vault status
+kubectl -n vault exec deploy/vault -- sh -c "VAULT_ADDR=http://127.0.0.1:8200 vault status"
 
 echo ""
 echo -e "${GREEN}✅ Vault initialisé et unseal${NC}"

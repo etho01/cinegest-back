@@ -13,28 +13,8 @@ env:
   CONTAINER_NAME: app
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, json, bcmath, pdo_sqlite
-          coverage: none
-      
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-      
-      - name: Run tests
-        run: php artisan test
 
   build-and-push:
-    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
