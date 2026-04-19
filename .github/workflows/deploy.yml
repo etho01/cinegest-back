@@ -118,14 +118,34 @@ jobs:
 
       - name: Deploy Vault integration
         run: |
+          # Debug : vérifier que les CRDs sont bien là
+          echo "=== Debugging CRDs before deployment ==="
+          kubectl get crd | grep external-secrets || echo "⚠️ No ESO CRDs found!"
+          kubectl api-resources | grep secretstore || echo "⚠️ SecretStore not in API resources!"
+          echo "========================================"
+          
           # Déployer les namespaces
           kubectl apply -f k8s/namespace.yaml
           
           # Déployer le ServiceAccount pour Vault auth
           kubectl apply -f k8s/vault/serviceaccount.yaml
           
-          # Déployer SecretStore et ExternalSecret
-          kubectl apply -f k8s/secretstore.yaml
+          # Déployer SecretStore et ExternalSecret avec retry (au cas où les CRDs mettent du temps)
+          echo "Deploying Vault SecretStore..."
+          for i in {1..5}; do
+            if kubectl apply -f k8s/secretstore.yaml; then
+              echo "✅ SecretStore deployed"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "❌ Failed to deploy SecretStore after 5 attempts"
+              exit 1
+            fi
+            echo "Retry $i/5 - waiting for CRDs to be fully available..."
+            sleep 5
+          done
+          
+          echo "Deploying Vault ExternalSecret..."
           kubectl apply -f k8s/externalsecret.yaml
           
           echo "✅ Vault integration manifests deployed"
