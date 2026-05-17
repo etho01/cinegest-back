@@ -40,7 +40,7 @@ class GetUpcomingMovies
         $moviesWithSessionsThisWeek = $this->sessionRepository->getMovieIdsByDateRange($dateRange);
 
         // Récupérer les films actifs sans séances cette semaine
-        $upcomingMovies = $this->movieRepository->getActiveMoviesExcluding($moviesWithSessionsThisWeek);
+        $upcomingMovies = $this->movieRepository->getUpcomingMoviesExcluding($moviesWithSessionsThisWeek);
 
         // Récupérer les IDs externes
         $movieExternalIds = array_map(fn($movie) => $movie->externalId(), $upcomingMovies);

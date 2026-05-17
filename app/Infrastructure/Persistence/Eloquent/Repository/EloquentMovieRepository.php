@@ -31,12 +31,17 @@ class EloquentMovieRepository implements MovieRepositoryInterface
         return $models->map(fn($model) => MovieMapper::toDomainEntity($model))->toArray();
     }
 
-    public function getActiveMoviesExcluding(array $excludeIds): array
+    public function getUpcomingMoviesExcluding(array $excludeIds): array
     {
         $ids = array_map(fn(MovieId $id) => $id->value(), $excludeIds);
         
         $models = MovieModel::where('status', 1)
             ->whereNotIn('id', $ids)
+            ->whereIn('id', function($query) {
+                $query->select('movieId')
+                    ->from('sessions')
+                    ->where('sessions.startTime', '>=', now());
+            })
             ->whereNotNull('externalId')
             ->get();
         

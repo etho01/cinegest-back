@@ -30,5 +30,5 @@ interface MovieRepositoryInterface
      * @param MovieId[] $excludeIds
      * @return Movie[]
      */
-    public function getActiveMoviesExcluding(array $excludeIds): array;
+    public function getUpcomingMoviesExcluding(array $excludeIds): array;
 }
